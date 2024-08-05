@@ -1,0 +1,410 @@
+SQL> CREATE TABLE STUDENT (
+  2      regno VARCHAR(20) PRIMARY KEY,
+  3      name VARCHAR(50),
+  4      major VARCHAR(20),
+  5      bdate DATE
+  6  );
+
+Table created.
+
+SQL> CREATE TABLE COURSE (
+  2      course# INT PRIMARY KEY,
+  3      cname VARCHAR(30),
+  4      dept VARCHAR(30)
+  5  );
+
+Table created.
+
+SQL> CREATE TABLE TEXT (
+  2      book_isbn INT PRIMARY KEY,
+  3      booktitle VARCHAR(50),
+  4      publisher VARCHAR(50),
+  5      author VARCHAR(50)
+  6  );
+
+Table created.
+
+SQL> CREATE TABLE ENROLL (
+  2      regno VARCHAR(20),
+  3      course# INT,
+  4      sem INT,
+  5      book_isbn INT,
+  6      PRIMARY KEY (regno, course#),
+  7      FOREIGN KEY (regno) REFERENCES STUDENT(regno),
+  8      FOREIGN KEY (course#) REFERENCES COURSE(course#)
+  9  );
+
+Table created.
+
+SQL> CREATE TABLE BOOK_ADOPTION (
+  2      course# INT,
+  3      sem INT,
+  4      book_isbn INT,
+  5      PRIMARY KEY (course#,book_isbn),
+  6      FOREIGN KEY (course#) REFERENCES COURSE(course#),
+  7      FOREIGN KEY (book_isbn) REFERENCES TEXT(book_isbn)
+  8  );
+
+Table created.
+
+SQL> INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+  2  ('S001', 'Alice', 'Computer Science', DATE '2000-01-01');
+
+1 row created.
+
+SQL> INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+  2  ('S002', 'Bob', 'Mathematics',DATE '2000-02-02');
+
+1 row created.
+
+SQL> INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+  2  ('S003', 'Charlie', 'English Literature',DATE '2000-03-03');
+
+1 row created.
+
+SQL> INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+  2  ('S004', 'David', 'History',DATE '2000-04-04');
+
+1 row created.
+
+SQL> INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+  2  ('S005', 'Emma', 'Physics',DATE '2000-05-05');
+
+1 row created.
+
+SQL>
+SQL> INSERT INTO COURSE (course#, cname, dept) VALUES
+  2  (101, 'Introduction to Programming', 'Computer Science');
+
+1 row created.
+
+SQL> INSERT INTO COURSE (course#, cname, dept) VALUES
+  2  (102, 'Calculus', 'Mathematics');
+
+1 row created.
+
+SQL> INSERT INTO COURSE (course#, cname, dept) VALUES
+  2  (103, 'World Literature', 'English');
+
+1 row created.
+
+SQL> INSERT INTO COURSE (course#, cname, dept) VALUES
+  2  (104, 'European History', 'History');
+
+1 row created.
+
+SQL> INSERT INTO COURSE (course#, cname, dept) VALUES
+  2  (105, 'Mechanics', 'Physics');
+
+1 row created.
+
+SQL> INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+  2  ('S001', 101, 1, 101);
+
+1 row created.
+
+SQL> INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+  2  ('S001', 102, 1, 102);
+
+1 row created.
+
+SQL> INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+  2  ('S002', 102, 1, 103);
+
+1 row created.
+
+SQL> INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+  2  ('S003', 103, 1, 104);
+
+1 row created.
+
+SQL> INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+  2  ('S004', 104, 1, 105);
+
+1 row created.
+
+SQL> INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+  2  ('S005', 105, 1, 106);
+
+1 row created.
+
+SQL> INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+  2  (101, 'Introduction to Programming with Python', 'ABC Publications', 'John Doe');
+
+1 row created.
+
+SQL> INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+  2  (102, 'Calculus: Concepts and Contexts', 'XYZ Publishing', 'Jane Smith');
+
+1 row created.
+
+SQL> INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+  2  (103, 'Calculus: Early Transcendentals', 'XYZ Publishing', 'John Smith');
+
+1 row created.
+
+SQL> INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+  2  (104, 'World Literature Anthology', 'PQR Books', 'Alice Johnson');
+
+1 row created.
+
+SQL> INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+  2  (105, 'European History: A Very Short Introduction', 'LMN Press', 'David Williams');
+
+1 row created.
+
+SQL> INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+  2  (106, 'Fundamentals of Mechanics', 'ABC Publications', 'Emily Brown');
+
+1 row created.
+
+SQL> INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+  2  (101, 1, 101);
+
+1 row created.
+
+SQL> INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+  2  (102, 1, 102);
+
+1 row created.
+
+SQL> INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+  2  (102, 1, 103);
+
+1 row created.
+
+SQL> INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+  2  (103, 1, 104);
+
+1 row created.
+
+SQL> INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+  2  (104, 1, 105);
+
+1 row created.
+
+SQL> INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+  2  (105, 1, 106);
+
+1 row created.
+
+a)
+
+SQL> SELECT course#, cname
+  2  FROM COURSE
+  3  WHERE course# IN (
+  4      SELECT course#
+  5      FROM BOOK_ADOPTION
+  6      GROUP BY course#
+  7      HAVING COUNT(*) > 1      --This condition filters the grouped results. It 
+                                            ensures that only groups where the count of 
+                                           book_isbn is greater than 1 are included.
+  8  );
+
+   COURSE# CNAME
+---------- ------------------------------
+       102 Calculus
+
+b)
+
+SQL> SELECT dept
+  2  FROM COURSE c
+  3  WHERE NOT EXISTS (
+  4      SELECT *
+  5      FROM COURSE c2
+  6      WHERE c2.dept = c.dept`
+  7      AND c2.course# NOT IN (
+  8          SELECT ba.course#
+  9          FROM BOOK_ADOPTION ba
+ 10          JOIN TEXT t ON ba.book_isbn = t.book_isbn
+ 11          WHERE t.publisher = 'XYZ Publishing'
+ 12      )
+ 13  );
+
+DEPT
+------------------------------
+Mathematics
+
+c)
+
+SQL> SELECT regno, name
+  2  FROM STUDENT
+  3  WHERE regno IN (
+  4      SELECT regno
+  5      FROM ENROLL
+  6      GROUP BY regno
+  7      HAVING COUNT(DISTINCT course#) > 1
+  8  );
+
+REGNO                NAME
+-------------------- --------------------------------------------------
+S001                 Alice
+
+d)
+
+SQL> SELECT regno, name
+  2  FROM STUDENT
+  3  WHERE regno NOT IN (
+  4      SELECT DISTINCT regno
+  5      FROM ENROLL
+  6  );
+
+REGNO                NAME
+-------------------- --------------------------------------------------
+S006                 Frank
+
+e)
+
+no eee
+
+f)
+
+SQL> SELECT book_isbn
+  2     FROM book_adoption NATURAL JOIN course
+  3     WHERE course# in
+  4     (SELECT course# FROM enroll);
+
+ BOOK_ISBN
+----------
+       101
+       102
+       103
+       104
+       105
+       106
+
+6 rows selected.
+
+g)
+
+SQL> SELECT course#
+  2  FROM BOOK_ADOPTION
+  3  WHERE book_isbn IN (
+  4      SELECT book_isbn
+  5      FROM TEXT
+  6      WHERE publisher = 'XYZ Publishing'
+  7  )
+  8  GROUP BY course#
+  9  HAVING COUNT(*) >= 2;
+
+   COURSE#
+----------
+       102
+
+h)
+
+SQL> SELECT regno, name, COUNT(*)
+  2     FROM student NATURAL JOIN enroll NATURAL JOIN book_adoption
+  3     GROUP BY regno,name
+  4     HAVING COUNT(*)>=all(
+  5     SELECT COUNT(book_isbn)
+  6     FROM book_adoption
+  7     GROUP BY course#);
+
+REGNO                NAME
+-------------------- --------------------------------------------------
+  COUNT(*)
+----------
+S001                 Alice
+         2
+
+i)
+
+SQL> SELECT publisher, COUNT(*) AS num_books_published
+  2  FROM TEXT
+  3  GROUP BY publisher;
+
+PUBLISHER                                          NUM_BOOKS_PUBLISHED
+-------------------------------------------------- -------------------
+ABC Publications                                                     2
+XYZ Publishing                                                       2
+PQR Books                                                            1
+LMN Press                                                            1
+
+j)
+
+SQL> SELECT distinct regno
+  2     FROM student NATURAL JOIN enroll e
+  3     WHERE not exists(
+  4     (SELECT course#
+  5     FROM course NATURAL JOIN enroll
+  6     GROUP BY course#)
+  7     MINUS
+  8     ( SELECT course# FROM course NATURAL JOIN book_adoption GROUP BY course#));
+
+REGNO
+--------------------
+S001
+S002
+S003
+S004
+S005
+
+SQL> commit;
+
+Commit complete.
+
+SQL> select * from student;
+
+REGNO                NAME             MAJOR                BDATE
+-------------------- ---------      ----------------    ------------
+S001                 Alice          Computer Science     01-JAN-00
+S002                 Bob            Mathematics          02-FEB-00
+S003                 Charlie        English Literature   03-MAR-00
+S004                 David          History              04-APR-00
+S005                 Emma           Physics              05-MAY-00
+S006                 Frank          Chemistry            06-JUN-00
+
+6 rows selected.
+
+SQL> select * from course;
+
+   COURSE# CNAME                          DEPT
+---------- ------------------------------ ------------------------------
+       101 Introduction to Programming    Computer Science
+       102 Calculus                       Mathematics
+       103 World Literature               English
+       104 European History               History
+       105 Mechanics                      Physics
+
+SQL> select * from text;
+
+BOOK_ISBN          BOOKTITLE                                    PUBLISHER            AUTHOR
+--------------  -------------------------------------------  ------------------  -------------
+
+101               Introduction to Programming with Python     ABC Publications      John Doe
+102               Calculus: Concepts and Contexts             XYZ Publishing        Jane Smith
+103               Calculus: Early Transcendentals             XYZ Publishing        John Smith
+104               World Literature Anthology                  PQR Books             Alice Johnson
+105            European History: A Very Short Introduction    LMN Press             David Williams
+106              Fundamentals of Mechanics                   ABC Publications       Emily Brown
+
+6 rows selected.
+
+SQL> select * from book_adoption;
+
+   COURSE#        SEM  BOOK_ISBN
+---------- ---------- ----------
+       101          1        101
+       102          1        102
+       102          1        103
+       103          1        104
+       104          1        105
+       105          1        106
+
+6 rows selected.
+
+SQL> select * from enroll;
+
+REGNO                   COURSE#        SEM  BOOK_ISBN
+-------------------- ---------- ---------- ----------
+S001                        101          1        101
+S001                        102          1        102
+S002                        102          1        103
+S003                        103          1        104
+S004                        104          1        105
+S005                        105          1        106
+
+6 rows selected.
+
+SQL>

@@ -1,0 +1,3663 @@
+Lab 1
+
+Q1
+
+Client :
+// Q1 TCP program to send an array of numbers to the server and choose from 4 options to do the required stuff
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<sys/socket.h>
+#define myport 1234
+int main()
+{
+    //create assign listen accept operate reply
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sockfd == -1)
+    { printf("socket creation error");
+        exit(0);
+    }
+    struct sockaddr_in c_addr;
+    c_addr.sin_port = htons(myport);
+    c_addr.sin_family = AF_INET;
+    c_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    memset(c_addr.sin_zero, '\0', sizeof(c_addr.sin_zero));
+    
+    int size = sizeof(struct sockaddr);
+    connect(sockfd, (struct sockaddr*) &c_addr, sizeof(c_addr));
+    
+    int buffer[10];
+    int choice, sz, temp;
+    int odd[10] = {0};
+    int even[10] = {0};
+    int a =0, b = 0;
+    
+    while(1)
+    {
+        printf("\n\n1. Sort in ascending order");
+        printf("\n2. Sort in descending order");
+        printf("\n3. Split into odd and even arrays");
+        printf("\n4. Exit");
+        printf("\nEnter your choice:");
+        scanf("%d", &choice);
+        switch(choice)
+        {
+            case 1://asc order
+                    printf("\nEnter the no of elements in array:");
+                    scanf("%d", &sz);
+                    printf("\nEnter the elements in array:");
+                    for(int i=0 ; i<sz ; i++)
+                        scanf("%d", &buffer[i]);
+
+                    send(sockfd, buffer, sizeof(buffer), 0);
+                    send(sockfd, &sz, sizeof(sz), 0);
+                    send(sockfd, &choice, sizeof(choice), 0);
+                    recv(sockfd, buffer, sizeof(buffer),0);
+                    printf("\nThe array in ascending order is \n");
+                    for(int i=0 ; i<sz ; i++)
+                        printf("%d ", buffer[i]);
+                    break;
+        case 2://des ord
+                printf("\nEnter the no of elements in array:");
+                    scanf("%d", &sz);
+                    printf("\nEnter the elements in array:");
+                    for(int i=0 ; i<sz ; i++)
+                        scanf("%d", &buffer[i]);
+                    send(sockfd, buffer, sizeof(buffer), 0);
+                    send(sockfd, &sz, sizeof(sz), 0);
+                    send(sockfd, &choice, sizeof(choice), 0);
+                    recv(sockfd, buffer, sizeof(buffer),0);
+                    printf("\nThe array in descending order is \n");
+                    for(int i=0 ; i<sz ; i++)
+                        printf("%d ", buffer[i]);
+                    break;                  
+        case 3://split
+                    printf("\nEnter the no of elements in array:");
+                    scanf("%d", &sz);
+                    printf("\nEnter the elements in array:");
+                    for(int i=0 ; i<sz ; i++)
+                        scanf("%d", &buffer[i]);
+                    send(sockfd, buffer, 40, 0);
+                    send(sockfd, &sz, 4, 0);
+                    send(sockfd, &choice, 4, 0);
+                    
+                    recv(sockfd, odd, 40,0);
+                    recv(sockfd, &b, 4, 0);
+                    recv(sockfd, even, 40, 0);
+                    recv(sockfd, &a, 4, 0);
+                    printf("\nThe odd elements in the array \n");
+                    for(int i=0 ; i<b ; i++)
+                        printf("%d ", odd[i]);
+                    printf("\nThe odd elements in the array \n");
+                    for(int i=0 ; i<a ; i++)
+                        printf("%d ", even[i]);
+                    break;
+
+        case 4://exit
+                    send(sockfd, buffer, 40, 0);
+                    send(sockfd, &sz, 4, 0);
+                    send(sockfd, &choice, 4, 0);
+                    close(sockfd);
+                    exit(0);
+                    
+        } 
+    }
+}
+
+Server:
+// Q1 TCP program to send an array of numbers to the server and choose from 4 options to do the required stuff
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<sys/socket.h>
+#define myport 1234
+int main()
+{
+    //create assign bind listen accept operate reply
+    int size;
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0); //socket creation
+    struct sockaddr_in server_addr, c_addr;    
+    
+    //feeding values into the socket address structure
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(myport);
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    memset( server_addr.sin_zero, '\0', sizeof(server_addr.sin_zero) );
+    
+    bind( sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr) );
+    
+    //ready for listening
+    listen(sockfd, 10);
+    printf("The server is ready for listening.\n");
+    size = sizeof(struct sockaddr);
+    
+    int afd = accept(sockfd, (struct sockaddr *) & c_addr, &size);
+
+    int buffer[10];
+    int choice, sz, temp;
+    int odd[10] = {0};
+    int even[10] = {0};
+    int a =0, b = 0;
+    while(1)
+    {
+        recv(afd, buffer, sizeof(buffer), 0);
+        recv(afd, &sz, sizeof(sz), 0);
+        recv(afd, &choice, sizeof(choice), 0);
+        switch(choice)
+        {
+            case 1:// have to sort asc
+                    for(int i=0 ; i<sz-1 ; i++)
+                    {
+                        for(int j=0 ; j<sz-1-i ; j++)
+                        {
+                            if(buffer[j]>buffer[j+1])
+                            {
+                                temp = buffer[j];
+                                buffer[j] = buffer[j+1];
+                                buffer[j+1] = temp;
+                            }
+                        }
+                    }
+                    send(afd, buffer, 40, 0);
+                    break;
+            case 2:// hav to sort it in dsc order
+                    for(int i=0 ; i<sz-1 ; i++)
+                    {
+                        for(int j=0 ; j<sz-1-i ; j++)
+                        {
+                            if(buffer[j]<buffer[j+1])
+                            {
+                                temp = buffer[j];
+                                buffer[j] = buffer[j+1];
+                                buffer[j+1] = temp;
+                            }
+                        }
+                    }
+                    send(afd, buffer, 40, 0);
+                    break;
+            case 3: // have to split the array into odd and even
+
+
+                    for(int i=0 ; i<sz ; i++)
+                    {
+                        if(buffer[i]%2==0)
+                            even[a++] = buffer[i];
+                        else
+                            odd[b++] = buffer[i];                   
+                    }
+                    send(afd, odd, sizeof(odd), 0);
+                    send(afd , &b, sizeof(b) ,0);
+                    send(afd, even, sizeof(even), 0);
+                    send(afd, &a, sizeof(a), 0);
+
+                    break;
+            case 4:close(sockfd);
+                    exit(0);
+            
+        } 
+    }
+}
+
+Q2
+
+Client:
+// Q2 client
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<netinet/in.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#define myport 1324
+
+int main()
+{
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(myport);
+    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    memset(addr.sin_zero, '\0', sizeof(addr.sin_zero));
+    
+    // server will bind
+    
+    printf("Successful till here");
+    
+    char buffer[20];
+    int size = sizeof(struct sockaddr);
+    char result[20];
+    int len;
+    int a=0, e=0, i=0, o=0, u=0;
+    while(1)
+    {
+        printf("\nEnter the string:");
+        scanf("%s", buffer);
+        if(strcmp(buffer, "Halt")==0)
+        {
+            sendto(sockfd, buffer, 20,0, (struct sockaddr *)& addr, size);      
+            printf("Closing the socket(client)");   
+            close(sockfd);
+            exit(0);
+        }
+        sendto(sockfd, buffer, sizeof(buffer),0, (struct sockaddr *)& addr, size);
+        recvfrom(sockfd, result, sizeof(result), 0, (struct sockaddr *)& addr, &size);
+        recvfrom(sockfd, &len, 4, 0, (struct sockaddr *)& addr, &size);     
+        recvfrom(sockfd, &a, sizeof(a),0, (struct sockaddr *)& addr, &size);    
+        recvfrom(sockfd, &e, sizeof(e),0, (struct sockaddr *)& addr, &size);    
+        recvfrom(sockfd, &i, sizeof(i),0, (struct sockaddr *)& addr, &size);    
+        recvfrom(sockfd, &o, sizeof(o),0, (struct sockaddr *)& addr, &size);    
+        recvfrom(sockfd, &u, sizeof(u),0, (struct sockaddr *)& addr, &size);    
+        printf("Size of the string = %d\n", len);
+        printf("%s\n",result);
+        printf("Vowels count:\n");
+        printf("A = %d\n", a);
+        printf("E = %d\n", e);
+        printf("I = %d\n", i);
+        printf("O = %d\n", o);
+        printf("U = %d\n", u);
+    }
+    return 0;
+}
+
+Server:
+
+
+//q2 accept a string from user, send it to server and check if it a palindrome. then return length of the string along with the count of each vowels in the string
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<netinet/in.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#define myport 1324
+
+// udp - create bind nolisten noaccept send and receive
+int main()
+{
+
+    
+    int sockfd;
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    struct sockaddr_in server_addr, client_addr;
+    
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(myport);
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //this has to do something with the localhost
+    memset( &(server_addr.sin_zero), '\0', sizeof(server_addr.sin_zero));
+    
+    bind(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+    
+    printf("waiting to receive");
+    printf("\n");
+    
+    char buffer[20];
+    int size = sizeof(struct sockaddr);
+    int len=0, i, j;
+    
+    //recvfrom(sockfd, buffer, sizeof(buffer), 0, (struct sockaddr *) &client_addr, &size);
+    //printf("%s", buffer);
+    while(1)
+    {
+    
+        recvfrom(sockfd, buffer, 20, 0, (struct sockaddr*)& client_addr, &size);
+        if(strcmp(buffer, "Halt")==0)
+        {
+            close(sockfd);
+            exit(0);
+        } 
+        len = strlen(buffer);
+        char revbuf[20];
+        int a=0, e=0, I=0, o=0, u=0;
+        for(i=0, j=len-1 ; j>=0 ; j--, i++)
+        { revbuf[i] = buffer[j];
+            switch(buffer[i])
+            {
+                case 'a':
+                case 'A': a++; break;
+                
+                case 'e':
+                case 'E': e++; break;
+                
+                case 'i':
+                case 'I': I++; break;
+                
+                case 'o':
+                case 'O': o++; break;
+                
+                case 'u':
+                case 'U': u++; break;               
+            }
+        }
+        revbuf[i] = '\0'; // palindrome wont work without this
+        char result[20];
+        if(strcmp(revbuf, buffer)==0)
+            strcpy(result, "Palindrome");
+        else
+            strcpy(result , "Not a palindrome");
+
+        sendto(sockfd, result, sizeof(result), 0, (struct sockaddr*)& client_addr, size);
+        sendto(sockfd, &len, sizeof(len), 0, (struct sockaddr*)& client_addr, size);
+        sendto(sockfd, &a, sizeof(a), 0, (struct sockaddr *)& client_addr, size);   
+        sendto(sockfd, &e, sizeof(e), 0, (struct sockaddr *)& client_addr, size);   
+        sendto(sockfd, &I, sizeof(I), 0, (struct sockaddr *)& client_addr, size);   
+        sendto(sockfd, &o, sizeof(o), 0, (struct sockaddr *)& client_addr, size);   
+        sendto(sockfd, &u, sizeof(u), 0, (struct sockaddr *)& client_addr, size);   
+    }   
+    close(sockfd);  
+    return 0;
+}
+
+
+Lab 2
+
+Q1
+
+Server
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+
+#define PORT 8080
+
+int main() {
+    int server_fd, new_socket;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
+    char buffer[1024] = {0};
+    pid_t pid;
+
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
+
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(server_fd, 3) < 0) {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0) {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
+
+    pid = fork();
+
+    if (pid < 0) {
+        perror("fork failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid == 0) {
+        // Child process (receives messages)
+        printf("Child Process - PID: %d, PPID: %d\n", getpid(), getppid());
+
+        while (1) {
+            memset(buffer, 0, sizeof(buffer));
+            if (recv(new_socket, buffer, sizeof(buffer), 0) <= 0) //client send buffer to server
+             {
+                printf("Client disconnected.\n");
+                break;
+            }
+            printf("Client: %s\n", buffer);//buffer not zero it is displayed
+        }
+    } else {
+        // Parent process (sends messages)
+        printf("Parent Process - PID: %d, PPID: %d\n", getpid(), getppid());
+
+        while (1) {
+            memset(buffer, 0, sizeof(buffer)); //clear the buffer
+            printf("Server: ");//input is asked at server end
+            fgets(buffer, sizeof(buffer), stdin);
+            send(new_socket, buffer, strlen(buffer), 0);// sent to client end
+        }
+    }
+
+    close(new_socket);
+    close(server_fd);
+    return 0;
+}
+Client
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <string.h>
+
+#define PORT 8080
+
+int main() {
+    int sockfd;
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
+    char buffer[1024] = {0};
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("ERROR opening socket");
+        exit(EXIT_FAILURE);
+    }
+
+    server = gethostbyname("localhost");
+    if (server == NULL) {
+        fprintf(stderr, "ERROR, no such host\n");
+        exit(EXIT_FAILURE);
+    }
+
+    memset((char *)&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    memcpy((char *)&serv_addr.sin_addr.s_addr, (char *)server->h_addr, server->h_length);//memcpy is used to copy 
+    serv_addr.sin_port = htons(PORT);
+
+    if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+        perror("ERROR connecting");
+        exit(EXIT_FAILURE);
+    }
+
+    while (1) {
+        memset(buffer, 0, sizeof(buffer));
+        printf("Client: ");
+        fgets(buffer, sizeof(buffer), stdin);
+        send(sockfd, buffer, strlen(buffer), 0);
+
+        memset(buffer, 0, sizeof(buffer));
+        if (recv(sockfd, buffer, sizeof(buffer), 0) <= 0) {
+            printf("Server disconnected.\n");
+            break;
+        }
+        printf("Server: %s\n", buffer);
+    }
+
+    close(sockfd);
+    return 0;
+}
+
+
+Q2
+
+Server
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+
+#define PORT 8080
+
+void permute(char *str, int start, int end) {
+    if (start == end) {
+        printf("%s\n", str);
+    } else {
+        for (int i = start; i <= end; i++) {
+            // Swap characters at start and i position
+            char temp = str[start];
+            str[start] = str[i];
+            str[i] = temp;
+
+            // Recursively find permutations
+            permute(str, start + 1, end);
+
+            // Undo the swap to backtrack
+            temp = str[start];
+            str[start] = str[i];
+            str[i] = temp;
+        }
+    }
+}
+
+int main() {
+    int sockfd;
+    struct sockaddr_in servaddr, cliaddr;
+    char buffer[1024];
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    memset(&servaddr, 0, sizeof(servaddr));
+    memset(&cliaddr, 0, sizeof(cliaddr));
+
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+    servaddr.sin_port = htons(PORT);
+
+    if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+        perror("Bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    int len, n;
+    len = sizeof(cliaddr);
+
+    n = recvfrom(sockfd, buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)&cliaddr, &len);
+                                                                                          //MSG_WAITALL: This flag specifies that the recvfrom()
+                                                                                           function should block until the full amount of data is received.
+    buffer[n] = '\0';
+
+    printf("Client: %s\n", buffer);
+    printf("All permutations of the string:\n");
+    permute(buffer, 0, strlen(buffer) - 1);//buffer start and end
+
+    close(sockfd);
+    return 0;
+}
+Client
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+
+#define PORT 8080
+
+int main() {
+    int sockfd;
+    struct sockaddr_in servaddr;
+    char buffer[1024];
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    memset(&servaddr, 0, sizeof(servaddr));
+
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(PORT);
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+
+    printf("Enter a string: ");
+    fgets(buffer, sizeof(buffer), stdin);
+
+    sendto(sockfd, (const char *)buffer, strlen(buffer), MSG_CONFIRM, (const struct sockaddr *)&servaddr, sizeof(servaddr));
+
+    close(sockfd);
+    return 0;
+}
+
+
+Q3
+
+Server
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+
+#define PORT 8080
+
+void sortNumbers(char *str) {
+    int len = strlen(str);
+    for (int i = 0; i < len - 1; i++) {
+        for (int j = i + 1; j < len; j++) {
+            if (str[i] > str[j]) {
+                char temp = str[i];
+                str[i] = str[j];
+                str[j] = temp;
+            }
+        }
+    }
+}
+
+void sortChars(char *str) {
+    int len = strlen(str);
+    for (int i = 0; i < len - 1; i++) {
+        for (int j = i + 1; j < len; j++) {
+            if (str[i] < str[j]) {
+                char temp = str[i];
+                str[i] = str[j];
+                str[j] = temp;
+            }
+        }
+    }
+}
+
+int main() {
+    int sockfd, new_socket;
+    struct sockaddr_in server_addr, client_addr;
+    int addrlen = sizeof(server_addr);
+    char buffer[1024] = {0};
+    pid_t pid;
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    if (bind(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(sockfd, 3) < 0) {
+        perror("Listen failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((new_socket = accept(sockfd, (struct sockaddr *)&client_addr, (socklen_t *)&addrlen)) < 0) {
+        perror("Accept failed");
+        exit(EXIT_FAILURE);
+    }
+
+    pid = fork();
+
+    if (pid < 0) {
+        perror("Fork failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid == 0) {
+        // Child process sorts numbers in ascending order
+        printf("Child Process - PID: %d\n", getpid());
+
+        recv(new_socket, buffer, sizeof(buffer), 0);
+        printf("Received from client: %s\n", buffer);
+
+        sortNumbers(buffer);
+        send(new_socket, buffer, strlen(buffer), 0);
+
+        close(new_socket);
+    } else {
+        // Parent process sorts characters in descending order
+        printf("Parent Process - PID: %d\n", getpid());
+
+        recv(new_socket, buffer, sizeof(buffer), 0);
+        printf("Received from client: %s\n", buffer);
+
+        sortChars(buffer);
+        send(new_socket, buffer, strlen(buffer), 0);
+
+        close(new_socket);
+    }
+
+    close(sockfd);
+    return 0;
+}
+Client
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+
+#define PORT 8080
+#define SERVER_IP "127.0.0.1" // Replace with the server's IP address if needed
+
+int main() {
+    int sockfd;
+    struct sockaddr_in servaddr;
+    char buffer[1024];
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    memset(&servaddr, 0, sizeof(servaddr));
+
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(PORT);
+    servaddr.sin_addr.s_addr = inet_addr(SERVER_IP);
+
+    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+        perror("Connection failed");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Enter an alphanumeric string: ");
+    fgets(buffer, sizeof(buffer), stdin);
+
+    send(sockfd, buffer, strlen(buffer), 0);
+
+    recv(sockfd, buffer, sizeof(buffer), 0);
+    printf("Child Process Result (PID): %s\n", buffer);
+
+    recv(sockfd, buffer, sizeof(buffer), 0);
+    printf("Parent Process Result (PID): %s\n", buffer);
+
+    close(sockfd);
+    return 0;
+}
+
+
+Lab 3
+
+Q1
+
+Client 1
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#define PORT 12345
+
+int main() {
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+
+    // Create socket
+    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientSocket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Configure server address struct
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Use the server's IP address
+
+    // Connect to server
+    if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+        perror("Error connecting to server");
+        exit(EXIT_FAILURE);
+    }
+
+    // Send message to server
+    char message[1024];
+    sprintf(message, "Institute Of");
+
+    send(clientSocket, message, sizeof(message), 0);
+
+    // Close the client socket
+    close(clientSocket);
+
+    return 0;
+}
+
+Client 2
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#define PORT 12345
+
+int main() {
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+
+    // Create socket
+    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientSocket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Configure server address struct
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Use the server's IP address
+
+    // Connect to server
+    if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+        perror("Error connecting to server");
+        exit(EXIT_FAILURE);
+    }
+
+    // Send message to server
+    char message[1024];
+    sprintf(message, "Technology");
+
+    send(clientSocket, message, sizeof(message), 0);
+
+    // Close the client socket
+    close(clientSocket);
+
+    return 0;
+}
+
+Client 3
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#define PORT 12345
+
+int main() {
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+
+    // Create socket
+    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientSocket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Configure server address struct
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Use the server's IP address
+
+    // Connect to server
+    if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+        perror("Error connecting to server");
+        exit(EXIT_FAILURE);
+    }
+
+    // Send message to server
+    char message[1024];
+    sprintf(message, "Hello from Client 3");
+
+    send(clientSocket, message, sizeof(message), 0);
+
+    // Close the client socket
+    close(clientSocket);
+
+    return 0;
+}
+
+Server
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#define PORT 12345
+#define MAX_CLIENTS 2
+#define BUFFER_SIZE 1024
+
+void processClient(int clientSocket) {
+    char buffer[BUFFER_SIZE];
+    struct sockaddr_in clientAddr;
+    socklen_t addrSize = sizeof(clientAddr);//socklen_t is same as int
+
+    // Get the socket address of the connected client
+    if (getpeername(clientSocket, (struct sockaddr*)&clientAddr, &addrSize) == 0) 
+                                                             // is used to retrieve the address of the peer to which a socket is connected. If the function 
+                                                             returns 0, it means it executed successfully.
+     {
+        printf("Client connected from %s:%d\n",
+               inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+
+//This line prints the IP address and port number of the connected client.
+inet_ntoa(clientAddr.sin_addr): Converts the binary IP address (in network byte order) stored in clientAddr.sin_addr to a string representation.
+ntohs(clientAddr.sin_port): Converts the port number (in network byte order) stored in clientAddr.sin_port to host byte order and prints it.
+
+
+    }
+
+    // Receive message from the client
+    recv(clientSocket, buffer, sizeof(buffer), 0);
+    printf("Received message from client: %s\n", buffer);
+
+    // Open the file and append the received messages
+    FILE *file = fopen("Manipal.txt", "a");
+    if (file == NULL) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(file, "%s", buffer);//This line writes the content of the buffer to the file opened earlier.
+
+    // Close the file
+    fclose(file);
+
+    // Close the client socket
+    close(clientSocket);
+}
+
+int main() {
+    int serverSocket, clientSocket;
+    struct sockaddr_in serverAddr, clientAddr;
+    socklen_t addrSize = sizeof(struct sockaddr_in);
+
+    // Create socket
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (serverSocket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Configure server address struct
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+
+    // Bind the socket to the specified address and port
+    if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+        perror("Error binding");
+        exit(EXIT_FAILURE);
+    }
+
+    // Listen for incoming connections
+    if (listen(serverSocket, MAX_CLIENTS) == -1) {
+        perror("Error listening");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Server listening on port %d...\n", PORT);
+
+    int clientCount = 0;
+
+    while (1) {
+        // Accept a connection from a client
+        clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &addrSize);
+        if (clientSocket == -1) {
+            perror("Error accepting connection");
+            continue;
+        }
+
+        // Handle client in a separate process or thread
+        if (fork() == 0) {
+            // Child process
+            close(serverSocket);
+                                 //This line closes the server socket descriptor in the child process. This is typically done because the child process                                                               
+                                   doesn't need to listen for new connections
+            processClient(clientSocket);
+                                      //function likely contains the logic to handle the communication with the client.
+            exit(EXIT_SUCCESS);
+        } else {
+            // Parent process
+            close(clientSocket);
+            clientCount++;
+
+            if (clientCount >= MAX_CLIENTS) {
+                printf("Number of clients exceeded. Terminating sessions.\n");
+                // Notify all clients to terminate
+                // (Note: In a real-world scenario, you would use proper communication here)
+                break;
+            }
+        }
+    }
+
+    // Close the server socket
+    close(serverSocket);
+
+    return 0;
+}
+
+Q2
+
+Server
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <time.h>
+
+#define PORT 8080
+#define MAX_BUFFER_SIZE 1024
+
+// Function to check if two strings are anagrams
+int areAnagrams(const char *str1, const char *str2) {
+    int count[256] = {0};
+
+    // Check if both strings have the same length
+    if (strlen(str1) != strlen(str2))
+        return 0;
+
+    // Count characters in the first string
+    for (int i = 0; str1[i] != '\0'; i++) {
+        count[str1[i]]++;   //count[char]++ if same char is present in next string in count[char]-- it get substracted at end everything will be zeroo
+        count[str2[i]]--;
+    }
+
+    // Check if all counts are zero
+    for (int i = 0; i < 256; i++) {
+        if (count[i] != 0)//count should be zero
+            return 0;
+    }
+
+    return 1;
+}
+
+// Function to display date, time, and client socket address
+void displayDateTimeAndAddress(struct sockaddr_in clientAddr) {
+    time_t t;            //time_t is a type used for representing time values.
+    struct tm *tm_info;  //struct tm is a structure type used to hold time 
+
+    time(&t);            //time() function returns the current calendar time and put it in t
+    tm_info = localtime(&t);   //representing the time in the local timezone.
+
+    printf("Connection from %s at %s", inet_ntoa(clientAddr.sin_addr), asctime(tm_info));
+}
+
+int main() {
+    int serverSocket, clientSocket;
+    struct sockaddr_in serverAddr, clientAddr;
+    socklen_t addrSize = sizeof(struct sockaddr);
+
+    // Create server socket
+    if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("Socket creation error");
+        exit(EXIT_FAILURE);
+    }
+
+    // Initialize server address structure
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    serverAddr.sin_port = htons(PORT);
+
+    // Bind the socket
+    if (bind(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1) {
+        perror("Binding error");
+        exit(EXIT_FAILURE);
+    }
+
+    // Listen for incoming connections
+    if (listen(serverSocket, 3) == -1) {
+        perror("Listening error");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Server listening on port %d...\n", PORT);
+
+    while (1) {
+        // Accept connections from clients
+        if ((clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddr, &addrSize)) == -1) {
+            perror("Accept error");
+            exit(EXIT_FAILURE);
+        }
+
+        displayDateTimeAndAddress(clientAddr);
+
+        char str1[MAX_BUFFER_SIZE], str2[MAX_BUFFER_SIZE];
+        char resultMessage[MAX_BUFFER_SIZE];
+
+        // Receive strings from the client
+        recv(clientSocket, str1, MAX_BUFFER_SIZE, 0);
+        recv(clientSocket, str2, MAX_BUFFER_SIZE, 0);
+
+        // Check if strings are anagrams
+        if (areAnagrams(str1, str2)) {
+            strcpy(resultMessage, "The strings are anagrams.");
+        } else {
+            strcpy(resultMessage, "The strings are not anagrams.");
+        }
+
+        // Send the result back to the client
+        send(clientSocket, resultMessage, strlen(resultMessage), 0);
+
+        // Close the client socket
+        close(clientSocket);
+    }
+
+    close(serverSocket);
+
+    return 0;
+}
+
+Client
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 8080
+#define MAX_BUFFER_SIZE 1024
+
+int main() {
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+
+    // Create client socket
+    if ((clientSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("Socket creation error");
+        exit(EXIT_FAILURE);
+    }
+
+    // Initialize server address structure
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+        perror("Invalid address/Address not supported");
+        exit(EXIT_FAILURE);
+    }
+
+    // Connect to the server
+    if (connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1) {
+        perror("Connection failed");
+        exit(EXIT_FAILURE);
+    }
+
+    char str1[MAX_BUFFER_SIZE], str2[MAX_BUFFER_SIZE];
+    char resultMessage[MAX_BUFFER_SIZE];
+
+    // Prompt user to enter strings
+    printf("Enter the first string: ");
+    fgets(str1, MAX_BUFFER_SIZE, stdin);
+    send(clientSocket, str1, strlen(str1), 0);
+
+    printf("Enter the second string: ");
+    fgets(str2, MAX_BUFFER_SIZE, stdin);
+    send(clientSocket, str2, strlen(str2), 0);
+
+    // Receive the result from the server
+    recv(clientSocket, resultMessage, MAX_BUFFER_SIZE, 0);
+    printf("Result from server: %s", resultMessage);
+
+    // Close the client socket
+    close(clientSocket);
+
+    return 0;
+}
+
+Lab 4
+
+Q1
+
+Client 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 8888
+#define BUFFER_SIZE 256
+
+int calculateParity(const char *data) //based on even parity
+{
+    int parity = 0;
+    for (int i = 0; i < strlen(data); i++) {
+        if (data[i] == '1') {
+            parity ^= 1;
+
+//If the current character is '1', this line toggles the value of parity using the XOR operator ^= with the value 1. This effectively flips the value of parity between 0 and 1 based on the occurrence of '1' in the data.
+
+
+//Example:
+Let's say we have a data stream 10110. We need to calculate the even parity for this data.
+
+Count the number of '1' bits: There are 3 '1' bits.
+Since the number of '1' bits is odd, the parity bit should be set to '1' to make the total number of '1' bits even.
+So, the data with even parity would be: 101101.
+
+        }
+    }
+    return parity;
+}
+
+int main() {
+    int client_socket;
+    struct sockaddr_in server_addr;
+    char buffer[BUFFER_SIZE];
+
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_socket == -1) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    server_addr.sin_port = htons(SERVER_PORT);
+
+    if (connect(client_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Connection failed");
+        close(client_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Enter binary data to transmit: ");
+    fgets(buffer, BUFFER_SIZE, stdin);
+    buffer[strcspn(buffer, "\n")] = '\0'; // Remove newline character repalce \n with \0
+
+    // Calculate even parity and append it to the data
+    int parity = calculateParity(buffer);
+    sprintf(buffer + strlen(buffer), "%d", parity);  //This line appends the parity value to the end of the buffer.
+
+    // Send data to the server
+    send(client_socket, buffer, strlen(buffer), 0);
+
+    close(client_socket);
+    return 0;
+}
+
+Server
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define SERVER_PORT 8888
+#define BUFFER_SIZE 256
+
+int checkParity(const char *data) {
+    int parity = 0;
+    for (int i = 0; i < strlen(data) - 1; i++) {
+        if (data[i] == '1') {
+            parity ^= 1;
+        }
+    }
+    return parity == (data[strlen(data) - 1] - '0');
+
+//This line returns a boolean value indicating whether the calculated parity matches the parity bit stored in the last character of the string data.
+
+data[strlen(data) - 1]: Accesses the last character of the string data, which is assumed to be the parity bit.
+
+(data[strlen(data) - 1] - '0'): Converts the character representation of the parity bit to an integer value. For example, if the last character is '0', it's converted to the integer 0, and if it's '1', it's converted to the integer 1.
+
+parity == (data[strlen(data) - 1] - '0'): Compares the calculated parity value (parity) with the integer representation of the parity bit. If they are equal, it returns true (1), indicating that the parity check passed. Otherwise, it returns false (0), indicating that the parity check failed.
+
+
+}
+
+int main() {
+    int server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    char buffer[BUFFER_SIZE];
+
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(SERVER_PORT);
+
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Bind failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(server_socket, 5) < 0) {
+        perror("Listen failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Waiting for a connection...\n");
+
+    client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len);
+
+    if (client_socket < 0) {
+        perror("Accept failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    // Receive data from the client
+    recv(client_socket, buffer, BUFFER_SIZE, 0);
+
+    // Check parity
+    if (checkParity(buffer)) {
+        printf("Received data with correct parity: %s\n", buffer);
+    } else {
+        printf("Received data with incorrect parity: %s\n", buffer);
+    }
+
+    close(server_socket);
+    close(client_socket);
+    return 0;
+
+
+Q2
+
+Client
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 8888
+#define BUFFER_SIZE 256
+#define CRC_POLYNOMIAL 0x8005 // CRC-16 polynomial
+
+unsigned short calculateCRC16(const char *data) //const char *data indicates that the function won't modify the contents of the string
+{
+    unsigned short crc = 0;// This variable will hold the calculated CRC-16 value.
+    int i, j;
+    for (i = 0; i < strlen(data); i++) {
+        crc ^= (unsigned short)data[i] << 8;
+                                           //This line XORs the current character in data with the current value of crc, left-shifted by 8 bits. It's a     
+                                              common step in CRC calculations to incorporate each byte of data into the CRC calculation.
+
+        for (j = 0; j < 8; j++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ CRC_POLYNOMIAL;
+
+//This block of code checks if the most significant bit of crc is set. If it is, it shifts crc left by one bit and XORs it with the CRC polynomial CRC_POLYNOMIAL. If not, it simply shifts crc left by one bit.
+
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    return crc;
+}
+
+//In CRC (Cyclic Redundancy Check), a polynomial is used to generate a sequence of bits (the CRC) from a block of data. This sequence is appended to the data being transmitted, and the receiver performs the same calculation on the received data to check for errors.
+
+The polynomial 0x8005 is represented as follows:
+
+In binary: 1000000000000101
+In polynomial notation: 
+x^16+x^15+x^2+1
+The polynomial is expressed in a binary form where each term corresponds to a bit position in the CRC. In this case:
+The leftmost bit (the most significant bit) corresponds to x^16
+The rightmost bit (the least significant bit) corresponds to x^0(which is 1).
+The CRC calculation proceeds as follows:
+
+Initialize the CRC register to 0.
+For each bit in the data stream (from left to right):
+If the most significant bit of the CRC register is 1:
+Shift the CRC register left by one bit.
+XOR the CRC register with the CRC polynomial.
+Otherwise (if the most significant bit of the CRC register is 0):
+Shift the CRC register left by one bit.
+After processing all bits in the data stream, the CRC register contains the CRC value.
+
+int main() {
+    int client_socket;
+    struct sockaddr_in server_addr;
+    char buffer[BUFFER_SIZE];
+
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_socket == -1) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    server_addr.sin_port = htons(SERVER_PORT);
+
+    if (connect(client_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Connection failed");
+        close(client_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Enter data to transmit: ");
+    fgets(buffer, BUFFER_SIZE, stdin);
+    buffer[strcspn(buffer, "\n")] = '\0'; // Remove newline character
+
+    // Calculate CRC-16 and append it to the data
+    unsigned short crc = calculateCRC16(buffer);
+    sprintf(buffer + strlen(buffer), "%hu", crc);   //%hu: This is the format specifier for an unsigned short integer
+
+    // Send data to the server
+    send(client_socket, buffer, strlen(buffer), 0);
+
+    close(client_socket);
+    return 0;
+}  
+
+Server
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define SERVER_PORT 8888
+#define BUFFER_SIZE 256
+#define CRC_POLYNOMIAL 0x8005 // CRC-16 polynomial
+
+int checkCRC16(const char *data) {
+    unsigned short crc = 0;
+    int i, j;
+    for (i = 0; i < strlen(data) - 4; i++)      //This line starts a loop that iterates over each character in the string data, excluding the last 4 
+                                                 characters
+      {
+        crc ^= (unsigned short)data[i] << 8;
+        for (j = 0; j < 8; j++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ CRC_POLYNOMIAL;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    unsigned short receivedCRC = atoi(data + strlen(data) - 4);
+
+//This line extracts the CRC value from the last 4 characters of the data string 
+converts it to an unsigned short integer using the atoi() function. 
+data + strlen(data) - 4 calculates the position of the start of the CRC value in the data string.
+    
+return crc == receivedCRC;
+}
+
+int main() {
+    int server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    char buffer[BUFFER_SIZE];
+
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(SERVER_PORT);
+
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Bind failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(server_socket, 5) < 0) {
+        perror("Listen failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Waiting for a connection...\n");
+
+    client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len);
+
+    if (client_socket < 0) {
+        perror("Accept failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    // Receive data from the client
+    recv(client_socket, buffer, BUFFER_SIZE, 0);
+
+    // Check CRC-16
+    if (checkCRC16(buffer)) {
+        printf("Received data with correct CRC-16: %s\n", buffer);
+    } else {
+        printf("Received data with incorrect CRC-16: %s\n", buffer);
+    }
+
+    close(server_socket);
+    close(client_socket);
+    return 0;
+}
+
+Q3
+
+Client
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 8888
+#define BUFFER_SIZE 256
+
+void addHammingCode(char *data, char *hammingCode) {
+    // Copy original data to hammingCode buffer
+    strcpy(hammingCode, data);
+
+    // Calculate parity bits
+    hammingCode[3] = (data[0] ^ data[1] ^ data[3]) + '0';  //add 0 to convert into char
+    hammingCode[5] = (data[0] ^ data[2] ^ data[3]) + '0';
+    hammingCode[6] = (data[1] ^ data[2] ^ data[3]) + '0';
+
+//These lines calculate and set the parity bits in the hammingCode buffer.
+Parity bits are calculated by XORing specific bits of the original data.
+
+For example, 
+hammingCode[3] represents the first parity bit. 
+It's calculated by XORing bits at positions 0, 1, and 3 of the original data (data[0], data[1], and data[3]). 
+The result is then converted to a character by adding '0' to it and stored in hammingCode[3].
+Similarly, hammingCode[5] represents the second parity bit, calculated by XORing bits at positions 0, 2, and 3 of the original data.
+hammingCode[6] represents the third parity bit, calculated by XORing bits at positions 1, 2, and 3 of the original data.
+
+}
+
+int main() {
+    int client_socket;
+    struct sockaddr_in server_addr;
+    char buffer[BUFFER_SIZE];
+    char hammingCode[BUFFER_SIZE];
+
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_socket == -1) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    server_addr.sin_port = htons(SERVER_PORT);
+
+    if (connect(client_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Connection failed");
+        close(client_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Enter 4 bits of data to transmit: ");
+    fgets(buffer, BUFFER_SIZE, stdin);
+    buffer[strcspn(buffer, "\n")] = '\0'; // Remove newline character
+
+    if (strlen(buffer) != 4) {
+        printf("Error: Enter exactly 4 bits of data.\n");
+        close(client_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    // Add Hamming Code to the data
+    addHammingCode(buffer, hammingCode);
+
+    // Send data with Hamming Code to the server
+    send(client_socket, hammingCode, strlen(hammingCode), 0);
+
+    close(client_socket);
+    return 0;
+}
+
+Server
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define SERVER_PORT 8888
+#define BUFFER_SIZE 256
+
+void checkAndCorrectHammingCode(char *receivedData) {
+    int p1, p2, p3;
+
+    // Calculate parity bits
+    p1 = (receivedData[0] ^ receivedData[2] ^ receivedData[4] ^ receivedData[6]) + '0';
+    p2 = (receivedData[1] ^ receivedData[2] ^ receivedData[5] ^ receivedData[6]) + '0';
+    p3 = (receivedData[3] ^ receivedData[4] ^ receivedData[5] ^ receivedData[6]) + '0';
+
+    // Convert parity bits to integer
+    int parityBits = (p3 - '0') * 4 + (p2 - '0') * 2 + (p1 - '0');  //This line converts the calculated parity bits (p1, p2, and p3) to an integer value.
+                                                                    //2^0=1   2^1=2   2^2=4
+
+    if (parityBits != 0) {
+        printf("Error detected and corrected in bit: %d\n", parityBits);
+        receivedData[parityBits - 1] = (receivedData[parityBits - 1] == '0') ? '1' : '0';   // It flips the value of the bit by toggling between '0' and 
+                                                                                             '1'.
+
+//if parity bit is not zero the there is error "receivedData[parityBits - 1]" so the location where there is error 0 is replaces wd 1 and 1 wd 0 
+
+    } else {
+        printf("No error detected.\n");
+    }
+}
+
+int main() {
+    int server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    char receivedData[BUFFER_SIZE];
+
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(SERVER_PORT);
+
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Bind failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(server_socket, 5) < 0) {
+        perror("Listen failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Waiting for a connection...\n");
+
+    client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len);
+
+    if (client_socket < 0) {
+        perror("Accept failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    // Receive data with Hamming Code from the client
+    recv(client_socket, receivedData, BUFFER_SIZE, 0);
+
+    // Check and correct Hamming Code
+    checkAndCorrectHammingCode(receivedData);
+
+    printf("Received data after error correction: %s\n", receivedData);
+
+    close(server_socket);
+    close(client_socket);
+    return 0;
+}
+
+
+Lab 5
+
+Q1
+
+Client
+
+// client.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+
+#define PORT 12345
+
+int main() {
+    int client_socket;
+    struct sockaddr_in server_addr;
+    char buffer[1024];
+
+    // Client setup
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_socket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    if (connect(client_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Error connecting to the server");
+        close(client_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Connected to the server.\n");
+
+    // Receive and display messages from the server
+    while (1) {
+        memset(buffer, 0, sizeof(buffer));
+        ssize_t recv_size = recv(client_socket, buffer, sizeof(buffer), 0);   //ssize_t act as int
+
+        if (recv_size <= 0)    //This line checks if the return value of recv is less than or equal to 0. This would indicate that either an error occurred 
+                                during the reception of data or the connection was closed by the server.
+       {
+            printf("Connection closed by the server.\n");
+            break;
+        }
+       printf("%s", buffer);
+    }
+
+    // Close the socket
+    close(client_socket);
+
+    return 0;
+}
+
+Server
+
+// server.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+
+#define BUCKET_SIZE 10
+#define OUTGOING_RATE 1
+#define PORT 12345
+
+typedef struct {
+    int arrival_time;
+    int packet_size;
+} Packet;
+
+typedef struct {
+    int bucket_size;
+    int current_size;
+} Bucket;
+
+void leakyBucket(Packet *packets, int num_packets, Bucket *bucket, int client_socket) {
+    int i;
+    char buffer[1024];
+
+    for (i = 0; i < num_packets; i++) {
+        sleep(packets[i].arrival_time); // Simulating arrival time
+
+        sprintf(buffer, "Packet %d (Size: %d bytes) arrived at time %d seconds.\n", i + 1, packets[i].packet_size, packets[i].arrival_time);
+        send(client_socket, buffer, strlen(buffer), 0);
+
+        if (packets[i].packet_size <= bucket->current_size) {
+            sprintf(buffer, "Packet %d is conforming. Sending to the network.\n", i + 1);
+            send(client_socket, buffer, strlen(buffer), 0);
+
+            bucket->current_size -= packets[i].packet_size;
+        } else {
+            sprintf(buffer, "Packet %d is nonconforming. Dropping the packet.\n", i + 1);
+            send(client_socket, buffer, strlen(buffer), 0);
+        }
+
+        // Refill the bucket based on outgoing rate
+        if (bucket->current_size < BUCKET_SIZE) {
+            int refill_amount = (BUCKET_SIZE - bucket->current_size) > OUTGOING_RATE ? OUTGOING_RATE : (BUCKET_SIZE - bucket->current_size);
+            bucket->current_size += refill_amount;
+
+//(BUCKET_SIZE - bucket->current_size) calculates how much space is left in the bucket.
+//#define OUTGOING_RATE 1 above defined
+//This line increases the current size of the bucket by refill_amount. It effectively refills the bucket by adding tokens or capacity to it.
+
+        }
+    }
+}
+
+int main() {
+    int num_packets;
+    printf("Enter the number of packets: ");
+    scanf("%d", &num_packets);
+
+    Packet packets[num_packets];
+
+    for (int i = 0; i < num_packets; i++) {
+        printf("Enter arrival time for Packet %d (in seconds): ", i + 1);
+        scanf("%d", &packets[i].arrival_time);
+
+        printf("Enter size for Packet %d (in bytes): ", i + 1);
+        scanf("%d", &packets[i].packet_size);
+    }
+
+    Bucket bucket = {
+        .bucket_size = BUCKET_SIZE,
+        .current_size = BUCKET_SIZE
+    };
+
+    // Server setup
+    int server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Error binding");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(server_socket, 5) == -1) {
+        perror("Error listening");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Leaky Bucket Server is waiting for connections...\n");
+
+    // Accept client connection
+    client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len);
+    if (client_socket == -1) {
+        perror("Error accepting connection");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Client connected.\n");
+
+    // Perform leaky bucket simulation
+    leakyBucket(packets, num_packets, &bucket, client_socket);
+
+    // Close sockets
+    close(client_socket);
+    close(server_socket);
+
+    return 0;
+}
+
+Q2
+
+Client
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <sys/time.h>
+
+#define PORT 12345
+
+typedef struct {
+    int packet_size;
+    int arrival_time;
+} Packet;
+
+int main() {
+    // Client setup
+    int client_socket;
+    struct sockaddr_in server_addr;
+
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_socket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    if (connect(client_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Error connecting to the server");
+        close(client_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Connected to the server.\n");
+
+    // Get the number of packets and maximum number of tokens from the user
+    int num_packets;
+    printf("Enter the number of packets to send: ");
+    scanf("%d", &num_packets);
+
+    int max_tokens;
+    printf("Enter the maximum number of tokens: ");
+    scanf("%d", &max_tokens);
+
+    // Send packets to the server periodically
+    Packet packet;
+
+    for (int i = 0; i < num_packets; i++) {
+        printf("Enter size for Packet %d (in KB): ", i + 1);
+        scanf("%d", &packet.packet_size);
+
+        struct timeval current_time;  //struct timeval is a structure used to represents the current time, including seconds and microseconds.
+        gettimeofday(&current_time, NULL);   //This line calls the gettimeofday() function to retrieve the current time and store it in the current_time 
+                                               variable.
+        packet.arrival_time = current_time.tv_sec;
+
+        // Check if the packet size is within the maximum number of tokens
+        if (packet.packet_size <= max_tokens) {
+            send(client_socket, &packet, sizeof(packet), 0);
+            max_tokens -= packet.packet_size; // Update the remaining tokens
+        } else {
+            printf("Packet of size %d KB exceeds maximum tokens. Skipped.\n", packet.packet_size);
+        }
+
+        sleep(1); // Wait for a second between sending packets
+    }
+
+    // Close the socket
+    close(client_socket);
+
+    return 0;
+}
+
+Server
+
+// server.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <sys/time.h>
+
+#define PORT 12345
+
+typedef struct {
+    int packet_size;
+    int arrival_time;
+} Packet;
+
+typedef struct {
+    double last_update_time;
+    int tokens; // Changed data type to int for discrete token amounts
+    double max_rate;
+    double replenishment_rate;
+} TokenBucket;
+
+void updateBucket(TokenBucket *bucket) {
+    struct timeval current_time;
+    gettimeofday(&current_time, NULL);
+    double elapsed_time = (current_time.tv_sec - bucket->last_update_time) + (current_time.tv_usec - bucket->last_update_time) / 1000000.0;
+                                                                                // It's computed in seconds, so we divide microseconds by 
+                                                                                    1,000,000 to convert them to seconds.
+                                                                               
+//current_time.tv_sec - bucket->last_update_time calculates the difference in whole seconds between the current time and the last update time.
+//current_time.tv_usec - bucket->last_update_time calculates the difference in microseconds between the current time and the last update time.
+
+
+    double tokens_added = elapsed_time * bucket->replenishment_rate;  //This line calculates the number of tokens to add to the bucket 
+
+    bucket->tokens = (bucket->tokens + tokens_added) > bucket->max_rate ? (int)bucket->max_rate : (int)(bucket->tokens + tokens_added);
+                                                                                                    //This line updates the number of tokens in the bucket.
+    bucket->last_update_time = current_time.tv_sec + (current_time.tv_usec / 1000000.0);  
+}
+
+int checkTokenBucket(TokenBucket *bucket, int packet_size) {
+    updateBucket(bucket);
+
+    if (bucket->tokens >= packet_size) {
+        bucket->tokens -= packet_size;
+        return 1; // Packet can pass
+    } else {
+        return 0; // Packet will be queued or dropped
+    }
+}
+
+int main() {
+    TokenBucket bucket;
+
+    printf("Enter the token bucket parameters:\n");
+
+    printf("Enter the maximum rate (in KBps): ");
+    scanf("%lf", &bucket.max_rate);    //lf bcoz it is double
+
+    printf("Enter the replenishment rate (in KBps): ");
+    scanf("%lf", &bucket.replenishment_rate);
+
+    printf("Enter the bucket size (in KB): ");
+    scanf("%d", &bucket.tokens);
+
+    printf("Enter the initial number of tokens (in KB): "); // Added user input for initial tokens
+    scanf("%d", &bucket.tokens);
+
+    bucket.last_update_time = 0;
+    // Server setup
+    int server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Error binding");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(server_socket, 5) == -1) {
+        perror("Error listening");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Token Bucket Server is waiting for connections...\n");
+
+    // Accept client connection
+    client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len);
+    if (client_socket == -1) {
+        perror("Error accepting connection");
+        close(server_socket);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Client connected.\n");
+
+    // Handle incoming packets and token bucket
+  Packet packet;
+ while (1) {
+    ssize_t recv_size = recv(client_socket, &packet, sizeof(packet), 0);
+
+    if (recv_size <= 0) {
+        printf("Connection closed by the client.\n");
+        break;
+    }
+
+    printf("Received packet of size %d KB at time %d seconds.\n", packet.packet_size, packet.arrival_time);
+
+    // Check if the packet size is within the available tokens in the bucket
+    if (checkTokenBucket(&bucket, packet.packet_size)) {
+        printf("Packet of size %d KB passed through the token bucket.\n", packet.packet_size);
+    } else {
+        printf("Packet of size %d KB queued or dropped due to insufficient tokens.\n", packet.packet_size);
+    }
+}
+
+    // Close sockets
+    close(client_socket);
+    close(server_socket);
+
+    return 0;
+}
+
+Lab 6
+
+1. Server
+
+ #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+struct Student {
+    char reg_number[20];
+    char name[100];
+    char address[100];
+    char dept[50];
+    char semester[20];
+    char section;
+    char courses[100];
+    char subject_code[10];
+    int marks;
+};
+
+void handleRegistrationNumber(int client_sock) {
+    struct Student student;   //create an instance
+    char buffer[BUFFER_SIZE];
+    
+    // Simulate fetching student details based on registration number
+    strcpy(student.name, "John Doe");                       //hard code the details or just use printf scanf to make it user defined
+    strcpy(student.address, "123 Main St, Anytown, USA");
+    
+    // Send student details to client
+    sprintf(buffer, "Name: %s\nAddress: %s\nChild Process PID: %d\n", student.name, student.address, getpid());
+    send(client_sock, buffer, strlen(buffer), 0);
+}
+
+void handleStudentName(int client_sock) {
+    struct Student student;
+    char buffer[BUFFER_SIZE];
+    
+    // Simulate fetching student enrollment details based on name
+    strcpy(student.dept, "Computer Science");
+    strcpy(student.semester, "3rd");
+    student.section = 'A';
+    strcpy(student.courses, "CSE101, CSE102, MAT101");
+    
+    // Send student enrollment details to client
+    sprintf(buffer, "Department: %s\nSemester: %s\nSection: %c\nCourses: %s\nChild Process PID: %d\n", student.dept, student.semester, student.section, student.courses, getpid());
+    send(client_sock, buffer, strlen(buffer), 0);
+}
+
+void handleSubjectCode(int client_sock) {
+    struct Student student;
+    char buffer[BUFFER_SIZE];
+    
+    // Simulate fetching marks based on subject code
+    student.marks = 85; // Simulated marks for subject code
+    
+    // Send marks to client
+    sprintf(buffer, "Marks Obtained: %d\nChild Process PID: %d\n", student.marks, getpid());
+    send(client_sock, buffer, strlen(buffer), 0);
+}
+
+int main() {
+    int server_fd, new_socket, valread;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
+    
+    // Create socket file descriptor
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
+    
+    // Bind the socket to the specified port
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Listen for incoming connections
+    if (listen(server_fd, 3) < 0) {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("Server is listening on port %d\n", PORT);
+    
+    while(1) {
+        // Accept incoming connection
+        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+            perror("accept");
+            exit(EXIT_FAILURE);
+        }
+        
+        printf("Client connected\n");
+        
+        int choice;
+        // Receive client's choice
+        recv(new_socket, &choice, sizeof(int), 0);
+        
+        switch(choice) {
+            case 1:
+                handleRegistrationNumber(new_socket);
+                break;
+            case 2:
+                handleStudentName(new_socket);
+                break;
+            case 3:
+                handleSubjectCode(new_socket);
+                break;
+            default:
+                printf("Invalid option\n");
+        }
+        
+        close(new_socket);
+    }
+    
+    close(server_fd);
+    return 0;
+}
+
+
+client
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+void displayMenu() {
+    printf("Menu:\n");
+    printf("1. Registration Number\n");
+    printf("2. Name of the Student\n");
+    printf("3. Subject Code\n");
+    printf("Enter your choice: ");
+}
+
+int main() {
+    int sockfd;
+    struct sockaddr_in servaddr;
+    
+    // Create socket
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    memset(&servaddr, 0, sizeof(servaddr));
+    
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(PORT);
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+    
+    // Connect to server
+    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+        perror("connection failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("Connected to server\n");
+    
+    int choice;
+    char buffer[BUFFER_SIZE];
+    while(1) {
+        displayMenu();
+        scanf("%d", &choice);
+        send(sockfd, &choice, sizeof(int), 0);
+        
+        switch(choice) {
+            case 1:
+            case 2:
+            case 3:
+                // Receive response from server
+                memset(buffer, 0, BUFFER_SIZE);
+                recv(sockfd, buffer, BUFFER_SIZE, 0);
+                printf("Server Response:\n%s\n", buffer);
+                break;
+            default:
+                printf("Invalid option\n");
+        }
+    }
+    
+    close(sockfd);
+    return 0;
+}
+
+
+2. Server
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#define SOCKET_PATH "/tmp/dns_server.sock"     //it is a string literal representing the path to a Unix domain socket file.
+                                                Unix domain sockets are communication endpoints within the file system on Unix-like operating systems. This                          
+                                                particular path points to a Unix domain socket file named dns_server.sock located in the /tmp directory.
+                                               //may be created as separate c prog as client and server with socket creation and basic                              
+                                               listen,accept,bing...etc
+#define BUFFER_SIZE 1024
+
+struct DNS_Record                       
+{
+    char domain[100];
+    char ip_address[20];
+};
+
+struct DNS_Record database[] =                             //creating instance for DNS_Record 
+{
+    {"www.example.com", "192.168.1.1"},
+    {"www.google.com", "8.8.8.8"},
+    {"www.yahoo.com", "98.139.183.24"}
+};
+
+int main() {
+    int server_fd, client_fd;
+    struct sockaddr_un server_addr, client_addr;
+    char buffer[BUFFER_SIZE];
+    
+    // Create socket file descriptor
+    if ((server_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Set socket address parameters
+    server_addr.sun_family = AF_UNIX;
+    strcpy(server_addr.sun_path, SOCKET_PATH);
+    unlink(SOCKET_PATH); // Remove any existing socket file
+    
+    // Bind the socket to the specified address
+    if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Listen for incoming connections
+    if (listen(server_fd, 5) == -1) {
+        perror("listen failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("DNS Server is listening on %s\n", SOCKET_PATH);
+    
+    socklen_t client_addr_len = sizeof(client_addr);
+    
+    while (1) {
+        // Accept incoming connection
+        if ((client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len)) == -1) {
+            perror("accept failed");
+            exit(EXIT_FAILURE);
+        }
+        
+        printf("Client connected\n");
+        
+        // Receive domain name from client
+        memset(buffer, 0, BUFFER_SIZE);
+        if (recv(client_fd, buffer, BUFFER_SIZE, 0) == -1) {
+            perror("recv failed");
+            close(client_fd);
+            continue;
+        }
+        
+        // Search for domain in the database
+        int found = 0;
+        for (int i = 0; i < sizeof(database) / sizeof(database[0]); ++i) 
+       {
+            if (strcmp(database[i].domain, buffer) == 0) 
+            {
+                // Send IP address to client
+                if (send(client_fd, database[i].ip_address, strlen(database[i].ip_address), 0) == -1) 
+                {
+                    perror("send failed");
+                }
+                found = 1;
+                break;
+            }
+        }
+        
+        if (!found) 
+        {
+            // Send error message to client if domain not found
+            if (send(client_fd, "Domain not found", strlen("Domain not found"), 0) == -1)
+             {
+                perror("send failed");
+            }
+        }
+        
+        close(client_fd);
+    }
+    
+    close(server_fd);
+    return 0;
+}
+  
+
+client
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#define SOCKET_PATH "/tmp/dns_server.sock"
+#define BUFFER_SIZE 1024
+
+int main() {
+    int sockfd;
+    struct sockaddr_un server_addr;
+    char buffer[BUFFER_SIZE];
+    
+    // Create socket file descriptor
+    if ((sockfd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Set socket address parameters
+    server_addr.sun_family = AF_UNIX;
+    strcpy(server_addr.sun_path, SOCKET_PATH);
+    
+    // Connect to server
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("connect failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("Connected to DNS Server\n");
+    
+    char domain[100];
+    printf("Enter domain name: ");
+    scanf("%s", domain);
+    
+    // Send domain name to server
+    if (send(sockfd, domain, strlen(domain), 0) == -1) {
+        perror("send failed");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+    
+    // Receive response from server
+    memset(buffer, 0, BUFFER_SIZE);
+    if (recv(sockfd, buffer, BUFFER_SIZE, 0) == -1) 
+    {
+        perror("recv failed");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+    
+    printf("DNS Server Response: %s\n", buffer);
+    
+    close(sockfd);
+    return 0;
+}
+
+
+
+Lab 7
+
+1. Using TCP
+
+client
+
+#include<string.h>
+#include<arpa/inet.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+
+int main()
+{
+int s,r,recb,sntb,x;
+
+printf("INPUT port number: ");     //this can be hard coded also
+scanf("%d", &x);
+
+struct sockaddr_in server;
+char buff[50];
+
+
+s=socket(AF_INET,SOCK_STREAM,0);
+if(s==-1)
+{
+printf("\nSocket creation error.");
+exit(0);
+}
+printf("\nSocket created.");
+
+
+server.sin_family=AF_INET;
+server.sin_port=htons(x);
+server.sin_addr.s_addr=inet_addr("127.0.0.1");
+
+
+r=connect(s,(struct sockaddr*)&server,sizeof(server));
+if(r==-1)
+{
+printf("\nConnection error.");
+exit(0);
+}
+printf("\nSocket connected.");
+
+
+printf("Type File Name: ");
+scanf("%s", buff);
+
+
+
+sntb=send(s,buff,sizeof(buff),0);
+if(sntb==-1)
+{
+close(s);
+printf("\nMessage Sending Failed");
+exit(0);
+}
+
+
+recb=recv(s,buff,sizeof(buff),0);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+exit(0);
+}
+
+
+printf("%s", buff);
+if(strcmp(buff,"File does not exist!")==0)
+{
+close(s);
+exit(0);
+}
+
+
+int ch=0;
+while(ch!=4)
+{
+printf("\n1.Search\n2.Replace\n3.Reorder\n4.Exit\nEnter your choice: ");
+scanf("%d",&ch);
+
+buff[0]=ch;   //at buff 0 it has ch value
+char str1[50],str2[50];
+int n,i,j;
+
+switch(ch)
+{
+case 1:printf("\nEnter string to be searched: ");
+scanf("%s",str1);
+
+n=strlen(str1);
+
+buff[1]=n;        //at buff 1 it has len of string
+
+for(i=0;i<n;i++)    //from i=i+2 i.e i=2 it store string to be serched
+buff[i+2]=str1[i];
+buff[i+2]='\0';
+
+sntb=send(s,buff,sizeof(buff),0);
+if(sntb==-1)
+{
+close(s);
+printf("\nMessage Sending Failed");
+exit(0);
+}
+
+
+recb=recv(s,buff,sizeof(buff),0);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+exit(0);
+}
+
+
+n=buff[0];   //buff sent no tym string repeat in opened file
+printf("\nWord found %d number of times!\n",n);
+break;
+
+
+case 2:printf("\nEnter string to be searched and replaced: ");
+scanf("%s",str1);
+
+n=strlen(str1);
+buff[1]=n;
+
+for(i=0;i<n;i++)
+buff[i+2]=str1[i];
+buff[i+2]='\0';
+
+
+sntb=send(s,buff,sizeof(buff),0);   //send it bcoz we need to store len of string to be replaced and the string in buff
+if(sntb==-1)
+{
+close(s);
+printf("\nMessage Sending Failed");
+exit(0);
+}
+
+
+printf("\nEnter new string: ");   //new sytring to replace
+scanf("%s",str2);
+
+n=strlen(str2);
+buff[1]=n;
+
+i=2;
+for(j=0;j<n;j++)
+{
+buff[i]=str2[j];
+i++;
+}
+buff[i]='\0';
+
+
+sntb=send(s,buff,sizeof(buff),0);
+if(sntb==-1)
+{
+close(s);
+printf("\nMessage Sending Failed");
+exit(0);
+}
+
+
+recb=recv(s,buff,sizeof(buff),0);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+exit(0);
+}
+
+
+printf("%s\n",buff);
+break;
+
+
+case 3:
+
+sntb=send(s,buff,sizeof(buff),0);
+if(sntb==-1)
+{
+close(s);
+printf("\nMessage Sending Failed");
+exit(0);
+}
+
+
+recb=recv(s,buff,sizeof(buff),0);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+exit(0);
+}
+
+printf("%s\n",buff);
+break;
+
+
+case 4:
+
+sntb=send(s,buff,sizeof(buff),0);
+if(sntb==-1)
+{
+close(s);
+printf("\nMessage Sending Failed");
+exit(0);
+}
+break;
+
+
+default:
+printf("\n Try Again!\n");
+}
+}
+close(s);
+}
+
+
+server
+
+
+#include<string.h>
+#include<unistd.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<stdlib.h>
+#include<stdio.h>
+#define MAX_LEN 100
+
+
+void replaceAll(char *str, const char *oldWord, const char *newWord)
+{
+    char *pos, temp[1000];
+    int index = 0;
+    int owlen;
+    owlen = strlen(oldWord);
+
+    while ((pos = strstr(str, oldWord)) != NULL)   //strstr() searches for the first occurrence of oldWord within str
+    {
+        strcpy(temp, str);   //str copied to temp
+
+        index = pos - str;    //This line calculates the index of the first occurrence of oldWord within str.
+
+        str[index] = '\0';    //This line terminates the string str at the index where oldWord was found.
+
+        strcat(str, newWord);     //This line concatenates the string newWord to the end of the modified str.
+
+        strcat(str, temp + index + owlen);   //It starts concatenating from the position following oldWord (indicated by temp + index + owlen) and appends 
+                                               it to the end of the modified str.
+    }
+}
+
+int main()
+{
+
+int s,r,recb,sntb,x,ns,a=0;
+
+printf("INPUT port number: ");
+scanf("%d", &x);
+
+socklen_t len;
+struct sockaddr_in server,client;
+char buff[50];
+
+s=socket(AF_INET,SOCK_STREAM,0);
+if(s==-1)
+{
+printf("\nSocket creation error.");
+exit(0);
+}
+printf("\nSocket created.");
+
+
+server.sin_family=AF_INET;
+server.sin_port=htons(x);
+server.sin_addr.s_addr=htonl(INADDR_ANY);
+
+
+r=bind(s,(struct sockaddr*)&server,sizeof(server));
+if(r==-1)
+{
+printf("\nBinding error.");
+exit(0);
+}
+printf("\nSocket binded.");
+
+
+
+r=listen(s,1);
+if(r==-1)
+{
+close(s);
+exit(0);
+}
+printf("\nSocket listening.\n");
+
+
+
+len=sizeof(client);
+ns=accept(s,(struct sockaddr*)&client, &len);
+if(ns==-1)
+{
+close(s);
+exit(0);
+}
+printf("\nSocket accepting.\n");
+
+
+recb=recv(ns,buff,sizeof(buff),0);   //buff recieved here
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+close(ns);
+exit(0);
+}
+
+
+printf("\nFile Name Recieved!\n");
+
+char fil[50];
+if( access( buff, F_OK ) != -1 ) 
+
+//It checks whether the file specified by the buff variable exists. 
+The access function is used for checking file accessibility. 
+F_OK is a flag indicating that the function should check whether the file exists.
+If the condition evaluates to true (i.e., if the file exists), the code block following this line will be executed.
+
+{
+    // file exists
+strcpy(fil,buff);
+strcpy(buff,"File exists");
+} 
+else 
+{
+    // file doesn't exist
+strcpy(buff,"File does not exist!");
+}
+
+sntb=send(ns,buff,sizeof(buff),0);
+if(sntb==-1)
+{
+printf("\nMessage Sending Failed");
+close(s);
+close(ns);
+exit(0);
+}
+
+
+if(strcmp(buff,"File does not exist!")==0)
+{
+close(s);
+close(ns);
+exit(0);
+}
+
+
+int ch=0;
+while(ch!=4){
+
+recb=recv(ns,buff,sizeof(buff),0);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+close(ns);
+exit(0);
+}
+
+ch = buff[0];
+int i,n,n1,n2,j;
+char str[50],str1[50],str2[50];
+char strTempData[MAX_LEN];
+    char **strData = NULL;   //declares a pointer to a pointer to a character (char) and initializes it to NULL.
+    int noOfLines = 0;
+
+switch(ch)
+{
+
+case 1:
+
+printf("\nSearching..\n");
+n=buff[1];     //buff 1 has len
+
+for(i=0;i<n;i++)
+str[i]=buff[i+2]; //from buff string is copied
+str[n]='\0';
+
+FILE *fp;        //This line declares a file pointer fp. File pointers are used in C to handle files. 
+int line_num = 1;
+int find_result = 0;
+char temp[512];     //temp declaration
+
+if((fp = fopen(fil, "r")) == NULL) 
+
+//This line attempts to open the file specified by the variable fil in read mode ("r") using the fopen() function.
+If the fopen() function returns NULL, it means the file couldn't be opened,
+
+{
+printf("\nFile not found");
+close(s);
+close(ns);
+exit(0);
+}
+
+while(fgets(temp, 512, fp) != NULL)    //reads a line from the file pointed to by fp //each line of the file is read into the character array temp with a 
+                                         maximum length of 512 characters.
+{
+if((strstr(temp, str)) != NULL)      //this line checks if the string stored in temp contains the substring stored in the variable str using the strstr() 
+                                           function.
+     {
+          find_result++;    //the number of occurrences of the string str in the file
+      }
+line_num++;    //move to next line
+}
+
+if(fp) 
+{
+fclose(fp);
+}
+buff[0]=find_result;  //This line assigns the value of find_result (the number of occurrences of the string str in the file) 
+
+
+sntb=send(ns,buff,sizeof(buff),0);
+if(sntb==-1)
+{
+printf("\nMessage Sending Failed");
+close(s);
+close(ns);
+exit(0);
+}
+break;
+
+
+case 2:
+
+n1=buff[1];  //for string1
+i=2;
+
+for(j=0;j<n1;j++)
+{
+str1[j]=buff[i];
+i++;
+}
+str1[j]='\0';
+
+
+recb=recv(ns,buff,sizeof(buff),0);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+close(ns);
+exit(0);
+}
+
+n=buff[1];   //for string2
+i=2;
+for(j=0;j<n;j++)
+{
+str2[j]=buff[i];
+i++;
+}
+str2[j]='\0';
+
+printf("\nReplacing %s with %s..\n",str1,str2);
+
+FILE * fPtr;
+FILE * fTemp;
+char buffer[1000];
+    fPtr  = fopen(fil, "r");   //read
+    fTemp = fopen("replace.tmp", "w");   //This line opens (or creates if it doesn't exist) a file named "replace.tmp" for writing ("w" mode).
+
+    if (fPtr == NULL || fTemp == NULL)   //if either of the file pointers, fPtr or fTemp, is NULL. If either one is NULL, it means there was an issue 
+                                           opening one of the files.
+    {
+        /* Unable to open file hence exit */
+        printf("\nUnable to open file.\n");
+        printf("Please check whether file exists and you have read/write privilege.\n");
+        exit(0);
+    }
+    while ((fgets(buffer, 1000, fPtr)) != NULL)   //eads each line from the input file pointed to by fPtr 
+                                                  //each line of the input file is read into the character array buffer with a maximum length of 1000 
+                                                    characters.
+                                                   //(fgets(buffer, 1000, fPtr)) != NULL checks if fgets() successfully reads a line.
+    {
+        replaceAll(buffer, str1, str2);  //replace function above
+                                          //each line of the input file is read into the character array buffer with a maximum length of 1000 
+                                                    characters.
+
+        fputs(buffer, fTemp);   //this line writes the modified line to the temporary file fTemp using the fputs() function.
+    }
+    fclose(fPtr);
+    fclose(fTemp);
+
+    remove(fil);    //original is removed
+
+    rename("replace.tmp", fil);  //replace.tmp is fil now
+
+    strcpy(buff,"Replace finished!");
+
+
+sntb=send(ns,buff,sizeof(buff),0);
+if(sntb==-1)
+{
+printf("\nMessage Sending Failed");
+close(s);
+close(ns);
+exit(0);
+}
+break;
+
+
+case 3:
+
+printf("\nOrdering file..\n");
+
+    FILE * ptrFileLog = NULL;
+    FILE * ptrSummary = NULL;
+
+    if ( (ptrFileLog = fopen(fil, "r")) == NULL )    //This line attempts to open the file whose name is stored in the variable fil for reading ("r" mode) 
+    {
+        fprintf(stderr,"Error: Could not open %s\n",fil);
+        return 1;
+    }
+
+
+    if ( (ptrSummary = fopen("temp.txt", "a")) == NULL ) //This line attempts to open (or create if it doesn't exist) a file named "temp.txt" for appending                
+                                                           ("a" mode)
+   {
+        fprintf(stderr,"Error: Could not open temp.txt\n");
+        return 1;
+    }
+
+
+
+    // Read and store in a string list.
+    while(fgets(strTempData, MAX_LEN, ptrFileLog) != NULL)   //reads lines from the file pointed to by ptrFileLog using fgets() function until it reaches 
+                                                                the end of the file 
+
+    {
+        if(strchr(strTempData,'\n'))
+        strTempData[strlen(strTempData)-1] = '\0';
+
+//If the newline character is found, it means the string has a trailing newline character.
+In that case, it replaces the newline character with a null terminator ('\0') by assigning '\0' to the character at the position just before the newline character. This effectively removes the newline character from the string.
+
+
+        strData = (char**)realloc(strData, sizeof(char**)*(noOfLines+1));
+
+//realloc() function is used to change the size of the previously allocated memory block.
+//noOfLines represents the number of lines read so far.
+
+        strData[noOfLines] = (char*)calloc(MAX_LEN,sizeof(char));
+
+//it allocates MAX_LEN characters for the new string using the calloc() function.
+
+        strcpy(strData[noOfLines], strTempData); //It copies the content of the temporary string strTempData into the newly allocated memory block in the 
+                                                     strData 
+
+        noOfLines++;
+
+//In summary, this code block reads lines from a file, removes any trailing newline characters from each line, dynamically allocates memory to store the lines in an array of strings (strData), and copies each line into the allocated memory block. The noOfLines variable keeps track of the number of lines read.
+
+    }
+    // Sort the array.
+    for(i= 0; i < (noOfLines - 1); ++i) 
+   {
+        for(j = 0; j < ( noOfLines - i - 1); ++j) 
+       {
+            if(strcmp(strData[j], strData[j+1]) > 0) //If the current string (strData[j]) is lexicographically greater than the next string (strData[j+1]), 
+                                                     it swaps their positions using a temporary variable strTempData.
+            {
+                strcpy(strTempData, strData[j]);
+                strcpy(strData[j], strData[j+1]);
+                strcpy(strData[j+1], strTempData);
+            }
+        }
+    }
+
+    
+    for(i = 0; i < noOfLines; i++)  //for loop that iterates through each element of the array strData.
+    fprintf(ptrSummary,"%s\n",strData[i]);  //write formatted data to the file pointed to by ptrSummary.
+                                             The format specifier "%s\n" indicates that a string followed by a newline character should be written to the      
+                                               file.
+    
+    for(i = 0; i < noOfLines; i++)
+        free(strData[i]);
+    
+    free(strData);
+    remove(fil);
+
+    rename("temp.txt",fil);
+
+    fclose(ptrFileLog);
+    fclose(ptrSummary);
+
+strcpy(buff,"Ordering done!");
+
+sntb=send(ns,buff,sizeof(buff),0);
+if(sntb==-1)
+{
+printf("\nMessage Sending Failed");
+close(s);
+close(ns);
+exit(0);
+}
+break;
+
+case 4:
+
+ch=4;
+break;
+}
+}
+close(ns);
+close(s);
+}
+
+
+
+2. UDP
+
+client
+
+#include<string.h>
+#include<arpa/inet.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+
+int main()
+{
+int s,r,recb,sntb,x;
+int sa;
+socklen_t len;
+
+printf("INPUT port number: ");
+scanf("%d", &x);
+
+struct sockaddr_in server,client;
+char buff[50];
+
+s=socket(AF_INET,SOCK_DGRAM,0);
+if(s==-1)
+{
+printf("\nSocket creation error.");
+exit(0);
+}
+
+printf("\nSocket created.");
+
+server.sin_family=AF_INET;
+server.sin_port=htons(x);
+server.sin_addr.s_addr=inet_addr("127.0.0.1");
+sa=sizeof(server);
+len=sizeof(server);
+
+printf("Type File Name: ");
+scanf("%s", buff);
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr *)&server, len);
+if(sntb==-1)
+{
+close(s);
+printf("\nMessage sending Failed");
+exit(0);
+}
+
+recb=recvfrom(s,buff,sizeof(buff),0,(struct sockaddr *)&server,&sa);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+exit(0);
+}
+
+printf("%s", buff);
+
+if(strcmp(buff,"File does not exist!")==0)
+{
+close(s);
+exit(0);
+}
+
+
+int ch=0;
+while(ch!=4)
+{
+
+printf("\n1.Search\n2.Replace\n3.Reorder\n4.Exit\nEnter your choice: ");
+scanf("%d",&ch);
+buff[0]=ch;
+char str1[50],str2[50];
+int n,i,j;
+
+switch(ch)
+{
+
+case 1:
+
+printf("\nEnter string to be searched: ");
+scanf("%s",str1);
+
+n=strlen(str1);
+buff[1]=n;
+
+for(i=0;i<n;i++)
+buff[i+2]=str1[i];
+buff[i+2]='\0';
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr *)&server, len);
+      if(sntb==-1)
+      {
+      close(s);
+      printf("\nMessage sending Failed");
+      exit(0);
+      }
+
+recb=recvfrom(s,buff,sizeof(buff),0,(struct sockaddr *)&server,&sa);
+      if(recb==-1)
+      {
+     printf("\nMessage Recieving Failed");
+     close(s);
+     exit(0);
+      }
+
+n=buff[0];
+
+printf("\nWord found %d number of times!\n",n);
+break;
+
+case 2:
+
+printf("\nEnter string to be searched and replaced: ");
+scanf("%s",str1);
+
+n=strlen(str1);
+buff[1]=n;
+
+for(i=0;i<n;i++)
+buff[i+2]=str1[i];
+buff[i+2]='\0';
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr *)&server, len);
+      if(sntb==-1)
+      {
+      close(s);
+      printf("\nMessage sending Failed");
+      exit(0);
+      }
+
+printf("\nEnter new string: ");
+scanf("%s",str2);
+
+n=strlen(str2);
+buff[1]=n;
+
+i=2;
+for(j=0;j<n;j++)
+{
+buff[i]=str2[j];
+i++;
+}
+buff[i]='\0';
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr *)&server, len);
+      if(sntb==-1)
+      {
+      close(s);
+      printf("\nMessage sending Failed");
+      exit(0);
+      }
+
+recb=recvfrom(s,buff,sizeof(buff),0,(struct sockaddr *)&server,&sa);
+      if(recb==-1)
+      {
+      printf("\nMessage Recieving Failed");
+      close(s);
+      exit(0);
+      }
+printf("%s\n",buff);
+
+break;
+
+case 3:
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr *)&server, len);
+      if(sntb==-1)
+      {
+          close(s);
+      printf("\nMessage sending Failed");
+      exit(0);
+      }
+
+recb=recvfrom(s,buff,sizeof(buff),0,(struct sockaddr *)&server,&sa);
+      if(recb==-1)
+      {
+      printf("\nMessage Recieving Failed");
+      close(s);
+      exit(0);
+      }
+
+printf("%s\n",buff);
+break;
+
+case 4:
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr *)&server, len);
+      if(sntb==-1)
+      {
+      close(s);
+              printf("\nMessage sending Failed");
+     exit(0);
+      }
+break;
+
+
+default:
+
+printf("\n Try Again!\n");
+}
+}
+close(s);
+}
+
+
+server
+
+
+#include<string.h>
+#include<unistd.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<stdlib.h>
+#include<stdio.h>
+#define MAX_LEN 100
+void replaceAll(char *str, const char *oldWord, const char *newWord)
+{
+    char *pos, temp[1000];
+    int index = 0;
+    int owlen;
+    owlen = strlen(oldWord);
+
+    while ((pos = strstr(str, oldWord)) != NULL)
+    {
+        strcpy(temp, str);
+
+        index = pos - str;
+
+        str[index] = '\0';
+
+        strcat(str, newWord);
+      
+        strcat(str, temp + index + owlen);
+    }
+}
+
+
+int main()
+{
+
+int s,r,recb,sntb,x;
+int ca;
+
+printf("INPUT port number: ");
+scanf("%d", &x);
+
+socklen_t len;
+struct sockaddr_in server,client;
+char buff[50];
+
+s=socket(AF_INET,SOCK_DGRAM,0);
+if(s==-1)
+{
+printf("\nSocket creation error.");
+exit(0);
+}
+printf("\nSocket created.");
+
+server.sin_family=AF_INET;
+server.sin_port=htons(x);
+server.sin_addr.s_addr=htonl(INADDR_ANY);
+len=sizeof(client);
+ca=sizeof(client);
+
+r=bind(s,(struct sockaddr*)&server,sizeof(server));
+if(r==-1)
+{
+printf("\nBinding error.");
+exit(0);
+}
+printf("\nSocket binded.");
+
+recb=recvfrom(s,buff,sizeof(buff),0,(struct sockaddr*)&client,&ca);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+exit(0);
+}
+
+printf("\nFile Name Recieved!\n");
+
+
+char fil[50];
+if( access( buff, F_OK ) != -1 ) 
+{
+strcpy(fil,buff);
+strcpy(buff,"File exists");
+} 
+else 
+{
+strcpy(buff,"File does not exist!");
+}
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr*)&client,len);
+if(sntb==-1)
+{
+printf("\nMessage Sending Failed");
+close(s);
+exit(0);
+}
+
+
+if(strcmp(buff,"File does not exist!")==0)
+{
+close(s);
+//close(ns);
+exit(0);
+}
+
+
+int ch=0;
+while(ch!=4){
+
+recb=recvfrom(s,buff,sizeof(buff),0,(struct sockaddr*)&client,&ca);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+exit(0);
+}
+
+ch = buff[0];
+int i,n,n1,n2,j;
+char str[50],str1[50],str2[50];
+char strTempData[MAX_LEN];
+    char **strData = NULL; 
+    int noOfLines = 0;
+
+    switch(ch)
+{
+case 1:
+
+printf("\nSearching..\n");
+
+n=buff[1];
+
+for(i=0;i<n;i++)
+str[i]=buff[i+2];
+str[n]='\0';
+
+FILE *fp;
+int line_num = 1;
+int find_result = 0;
+char temp[512];
+
+if((fp = fopen(fil, "r")) == NULL) 
+{
+printf("\nFile not found");
+close(s);
+//close(ns);
+exit(0);
+}
+
+while(fgets(temp, 512, fp) != NULL) {
+if((strstr(temp, str)) != NULL) {
+find_result++;
+}
+line_num++;
+}
+
+if(fp)
+{
+fclose(fp);
+}
+
+buff[0]=find_result;
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr*)&client,len);
+if(sntb==-1)
+{
+printf("\nMessage Sending Failed");
+close(s);
+exit(0);
+}
+break;
+
+case 2:
+
+n1=buff[1];
+
+i=2;
+for(j=0;j<n1;j++)
+{
+str1[j]=buff[i];
+i++;
+}
+str1[j]='\0';
+
+recb=recvfrom(s,buff,sizeof(buff),0,(struct sockaddr*)&client,&ca);
+if(recb==-1)
+{
+printf("\nMessage Recieving Failed");
+close(s);
+exit(0);
+}
+
+n=buff[1];
+
+i=2;
+for(j=0;j<n;j++)
+{
+str2[j]=buff[i];
+i++;
+}
+str2[j]='\0';
+
+printf("\nReplacing %s with %s..\n",str1,str2);
+
+FILE * fPtr;
+    FILE * fTemp;
+    char buffer[1000];
+    fPtr  = fopen(fil, "r");
+    fTemp = fopen("replace.tmp", "w");
+    if (fPtr == NULL || fTemp == NULL)
+    {
+        /* Unable to open file hence exit */
+        printf("\nUnable to open file.\n");
+        printf("Please check whether file exists and you have read/write privilege.\n");
+        exit(0);
+    }
+    while ((fgets(buffer, 1000, fPtr)) != NULL)
+    {
+        // Replace all occurrence of word from current line
+        replaceAll(buffer, str1, str2);
+
+        // After replacing write it to temp file.
+        fputs(buffer, fTemp);
+    }
+
+
+    /* Close all files to release resource */
+    fclose(fPtr);
+    fclose(fTemp);
+
+
+    /* Delete original source file */
+    remove(fil);
+
+    /* Rename temp file as original file */
+    rename("replace.tmp", fil);
+
+    strcpy(buff,"Replace finished!");
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr*)&client,len);
+if(sntb==-1)
+{
+printf("\nMessage Sending Failed");
+close(s);
+exit(0);
+}
+break;
+
+case 3: 
+
+printf("\nOrdering file..\n");
+
+    FILE * ptrFileLog = NULL;
+    FILE * ptrSummary = NULL;
+
+    if ( (ptrFileLog = fopen(fil, "r")) == NULL ) {
+        fprintf(stderr,"Error: Could not open %s\n",fil);
+        return 1;
+    }
+
+    if ( (ptrSummary = fopen("temp.txt", "a")) == NULL ) {
+        fprintf(stderr,"Error: Could not open temp.txt\n");
+        return 1;
+    }
+
+    // Read and store in a string list.
+    while(fgets(strTempData, MAX_LEN, ptrFileLog) != NULL)
+    {
+        // Remove the trailing newline character
+        if(strchr(strTempData,'\n'))
+        strTempData[strlen(strTempData)-1] = '\0';
+
+        strData = (char**)realloc(strData, sizeof(char**)*(noOfLines+1));
+
+        strData[noOfLines] = (char*)calloc(MAX_LEN,sizeof(char));
+
+        strcpy(strData[noOfLines], strTempData);
+
+        noOfLines++;
+    }
+    // Sort the array.
+    for(i= 0; i < (noOfLines - 1); ++i) 
+    {
+        for(j = 0; j < ( noOfLines - i - 1); ++j) 
+        {
+            if(strcmp(strData[j], strData[j+1]) > 0) 
+            {
+                strcpy(strTempData, strData[j]);
+                strcpy(strData[j], strData[j+1]);
+                strcpy(strData[j+1], strTempData);
+            }
+        }
+    }
+
+
+    // Write it to outfile. file.
+    for(i = 0; i < noOfLines; i++)
+        fprintf(ptrSummary,"%s\n",strData[i]);
+
+
+    // free each string
+    for(i = 0; i < noOfLines; i++)
+        free(strData[i]);
+    // free string list.
+    free(strData);
+    remove(fil);
+
+    rename("temp.txt",fil);
+
+    fclose(ptrFileLog);
+    fclose(ptrSummary);
+
+strcpy(buff,"Ordering done!");
+
+sntb=sendto(s,buff,sizeof(buff),0,(struct sockaddr*)&client,len);
+if(sntb==-1)
+{
+printf("\nMessage Sending Failed");
+close(s);
+exit(0);
+}
+break;
+
+case 4: 
+
+ch=4;
+break;
+}
+}
+close(s);
+}

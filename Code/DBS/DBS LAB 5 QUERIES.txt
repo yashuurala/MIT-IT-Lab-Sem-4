@@ -1,0 +1,197 @@
+CREATE TABLE STUDENT (
+    regno VARCHAR(20) PRIMARY KEY,
+    name VARCHAR(50),
+    major VARCHAR(20),
+    bdate DATE
+);
+
+CREATE TABLE COURSE (
+    course# INT PRIMARY KEY,
+    cname VARCHAR(30),
+    dept VARCHAR(30)
+);
+
+CREATE TABLE ENROLL (
+    regno VARCHAR(20),
+    course# INT,
+    sem INT,
+    book_isbn INT,
+    PRIMARY KEY (regno, course#),
+    FOREIGN KEY (regno) REFERENCES STUDENT(regno),
+    FOREIGN KEY (course#) REFERENCES COURSE(course#)
+);
+
+CREATE TABLE BOOK_ADOPTION (
+    course# INT,
+    sem INT,
+    book_isbn INT,
+    PRIMARY KEY (course#,book_isbn),
+    FOREIGN KEY (course#) REFERENCES COURSE(course#),
+    FOREIGN KEY (book_isbn) REFERENCES TEXT(book_isbn)
+);
+
+CREATE TABLE TEXT (
+    book_isbn INT PRIMARY KEY,
+    booktitle VARCHAR(50),
+    publisher VARCHAR(50),
+    author VARCHAR(50)
+);
+
+
+
+INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+('S001', 'Alice', 'Computer Science', DATE '2000-01-01');
+INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+('S002', 'Bob', 'Mathematics',DATE '2000-02-02');
+INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+('S003', 'Charlie', 'English Literature',DATE '2000-03-03');
+INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+('S004', 'David', 'History',DATE '2000-04-04');
+INSERT INTO STUDENT (regno, name, major, bdate) VALUES
+('S005', 'Emma', 'Physics',DATE '2000-05-05');
+
+INSERT INTO COURSE (course#, cname, dept) VALUES
+(101, 'Introduction to Programming', 'Computer Science');
+INSERT INTO COURSE (course#, cname, dept) VALUES
+(102, 'Calculus', 'Mathematics');
+INSERT INTO COURSE (course#, cname, dept) VALUES
+(103, 'World Literature', 'English');
+INSERT INTO COURSE (course#, cname, dept) VALUES
+(104, 'European History', 'History');
+INSERT INTO COURSE (course#, cname, dept) VALUES
+(105, 'Mechanics', 'Physics');
+
+INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+('S001', 101, 1, 101);
+INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+('S001', 102, 1, 102);
+INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+('S002', 102, 1, 103);
+INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+('S003', 103, 1, 104);
+INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+('S004', 104, 1, 105);
+INSERT INTO ENROLL (regno, course#, sem, book_isbn) VALUES
+('S005', 105, 1, 106);
+
+INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+(101, 1, 101);
+INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+(102, 1, 102);
+INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+(102, 1, 103);
+INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+(103, 1, 104);
+INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+(104, 1, 105);
+INSERT INTO BOOK_ADOPTION (course#, sem, book_isbn) VALUES
+(105, 1, 106);
+
+INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+(101, 'Introduction to Programming with Python', 'ABC Publications', 'John Doe');
+INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+(102, 'Calculus: Concepts and Contexts', 'XYZ Publishing', 'Jane Smith');
+INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+(103, 'Calculus: Early Transcendentals', 'XYZ Publishing', 'John Smith');
+INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+(104, 'World Literature Anthology', 'PQR Books', 'Alice Johnson');
+INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+(105, 'European History: A Very Short Introduction', 'LMN Press', 'David Williams');
+INSERT INTO TEXT (book_isbn, booktitle, publisher, author) VALUES
+(106, 'Fundamentals of Mechanics', 'ABC Publications', 'Emily Brown');
+
+INSERT INTO STUDENT (regno, name, major, bdate) VALUES ('S006', 'Frank', 'Chemistry',date '2000-06-06');
+
+a.
+SELECT course#, cname
+FROM COURSE
+WHERE course# IN (
+SELECT course#
+FROM BOOK_ADOPTION
+GROUP BY course#
+HAVING COUNT(*) > 1
+);
+
+b.
+ SELECT dept
+ FROM COURSE c
+ WHERE NOT EXISTS (
+ SELECT *
+ FROM COURSE c2
+ WHERE c2.dept = c.dept
+ AND c2.course# NOT IN (
+ SELECT ba.course#
+ FROM BOOK_ADOPTION ba
+ JOIN TEXT t ON ba.book_isbn = t.book_isbn
+ WHERE t.publisher = 'XYZ Publishing'
+ )
+ );
+
+c.
+SELECT regno, name
+FROM STUDENT
+WHERE regno IN (
+SELECT regno
+FROM ENROLL
+GROUP BY regno
+HAVING COUNT(DISTINCT course#) > 1
+);
+
+d.
+SELECT regno, name
+FROM STUDENT
+WHERE regno NOT IN (
+SELECT DISTINCT regno
+FROM ENROLL
+);
+
+e.
+
+f.
+SELECT book_isbn
+FROM book_adoption NATURAL JOIN course
+WHERE course# in
+(SELECT course# FROM enroll);
+
+g.
+ SELECT course#
+ FROM BOOK_ADOPTION
+ WHERE book_isbn IN (
+ SELECT book_isbn
+ FROM TEXT
+ WHERE publisher = 'XYZ Publishing'
+ )
+ GROUP BY course#
+ HAVING COUNT(DISTINCT book_isbn) >= 2;
+
+h.
+ SELECT regno, name, COUNT(*)
+ FROM student NATURAL JOIN enroll NATURAL JOIN book_adoption
+ GROUP BY regno,name
+ HAVING COUNT(*)>=all(
+ SELECT COUNT(book_isbn)
+ FROM book_adoption
+ GROUP BY course#);
+
+i.
+SELECT publisher, COUNT(*) AS num_books_published
+FROM TEXT
+GROUP BY publisher;
+
+j.
+SELECT distinct regno
+FROM student NATURAL JOIN enroll e
+WHERE not exists(
+(SELECT course# 
+FROM course NATURAL JOIN enroll 
+GROUP BY course#) 
+MINUS
+( SELECT course# 
+FROM course NATURAL JOIN book_adoption 
+GROUP BY course#));
+
+
+
+
+
+

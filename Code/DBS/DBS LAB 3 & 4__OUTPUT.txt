@@ -1,0 +1,440 @@
+LAB 1
+
+SQL> create table PERSON(
+  2  driver_id varchar(30) PRIMARY KEY,
+  3  name varchar(50),
+  4  Address varchar(100));
+
+Table created.
+
+SQL> create table CAR(
+  2  regno varchar(20) PRIMARY KEY,
+  3  model varchar(30),
+  4  Year int);
+
+Table created.
+
+SQL> create table ACCIDENT(
+  2  report_number int PRIMARY KEY,
+  3  accd_date date,
+  4  location varchar(50));
+
+Table created.
+
+SQL> create table OWNS(
+  2  driver_id varchar(30),
+  3  regno varchar(20),
+  4  primary key(driver_id, regno),
+  5  FOREIGN KEY(driver_id)references PERSON(driver_id));
+
+Table created.
+
+SQL> create table PARTICIPATED(
+  2  driver_id varchar(30),
+  3  regno varchar(20),
+  4  report_number int,
+  5  damage_amount int,
+  6  primary key(driver_id,regno,report_number),
+  7  FOREIGN KEY(driver_id)references PERSON(driver_id));
+
+Table created.
+
+SQL> insert into PERSON values('KA20 2019324', 'AKSHAY', 'MANIPAL');
+
+1 row created.
+
+SQL> insert into PERSON values('KA20 2015478', 'AMAN', 'MANIPAL');
+
+1 row created.
+
+SQL> insert into PERSON values('KA19 9853147', 'ARAYAN', 'MANGLORE');
+
+1 row created.
+
+SQL> insert into PERSON values('KA19 2982145', 'SOUBHIK', 'MANGLORE');
+
+1 row created.
+
+SQL> insert into PERSON values('KA20 2895341', 'VISHAL', 'MANIPAL');
+
+1 row created.
+
+SQL> insert into PERSON values('KA21 2098531', 'GAUTAM', 'UDUIPI');
+
+1 row created.
+
+SQL> insert into CAR values('KA20 S2345', 'Tata Nexon', 2016);
+
+1 row created.
+
+SQL> insert into CAR values('KA20 S8473', 'MG Astor', 2018);
+
+1 row created.
+
+SQL> insert into CAR values('KA21 S3514', 'Maruti Suzuki Baleno', 2014);
+
+1 row created.
+
+SQL> insert into CAR values('KA21 S1475', 'Maruti Suzuki Baleno', 2016);
+
+1 row created.
+
+SQL> insert into CAR values('KA19 S5478', 'Hyundai Venue', 2016);
+
+1 row created.
+
+SQL> insert into CAR values('KA22 S6325', 'Hyundai Creta', 2015);
+
+1 row created.
+
+SQL> insert into CAR values('KA19 S1452', 'Hyundai Creta', 2020);
+
+1 row created.
+
+SQL> insert into CAR values('KA19 S4875', 'Hyundai Venue', 2019);
+
+1 row created.
+
+
+SQL> insert into ACCIDENT values(11, date '2019-10-05', 'MANIPAL');
+
+1 row created.
+
+SQL> insert into ACCIDENT values(1, date '2020-09-14', 'MANGLORE');
+
+1 row created.
+
+SQL> insert into ACCIDENT values(12, date '2018-02-16', 'UDUIPI');
+
+1 row created.
+
+SQL> insert into ACCIDENT values(7, date '2019-11-17', 'MANIPAL');
+
+1 row created.
+
+SQL> insert into ACCIDENT values(9, date '2016-07-30', 'UDUIPI');
+
+1 row created.
+
+SQL> insert into ACCIDENT values(5, date '2021-03-21', 'MANGLORE');
+
+1 row created.
+
+SQL> insert into OWNS values('KA20 2019324', 'KA20 S8473');
+
+1 row created.
+
+SQL> insert into OWNS values('KA20 2015478', 'KA22 S6325');
+
+1 row created.
+
+SQL> insert into OWNS values('KA19 9853147', 'KA20 S2345');
+
+1 row created.
+
+SQL> insert into OWNS values('KA19 2982145', 'KA21 S3514');
+
+1 row created.
+
+SQL> insert into OWNS values('KA20 2895341', 'KA19 S1452');
+
+1 row created.
+
+SQL> insert into OWNS values('KA21 2098531', 'KA21 S1475');
+
+1 row created.
+
+SQL> insert into OWNS values('KA20 2019324', 'KA19 S4875');
+
+1 row created.
+
+SQL> insert into PARTICIPATED values('KA20 2015478', 'KA22 S6325', 11, 5000);
+
+1 row created.
+
+SQL> insert into PARTICIPATED values('KA20 2019324', 'KA19 S4875', 1, 35000);
+
+1 row created.
+
+SQL> insert into PARTICIPATED values('KA19 2982145', 'KA21 S3514', 9, 15000);
+
+1 row created.
+
+SQL> insert into PARTICIPATED values('KA20 2019324', 'KA20 S8473', 5, 19000);
+
+1 row created.
+
+SQL> insert into PARTICIPATED values('KA19 2982145', 'KA21 S3514', 7, 17000);
+
+1 row created.
+
+SQL> insert into PARTICIPATED values('KA20 2015478', 'KA22 S6325', 12, 3000);
+
+1 row created.
+
+SQL> select * from person;
+
+DRIVER_ID
+------------------------------
+NAME
+--------------------------------------------------
+ADDRESS
+--------------------------------------------------------------------------------
+KA20 2019324
+AKSHAY
+MANIPAL
+
+KA20 2015478
+AMAN
+MANIPAL
+
+DRIVER_ID
+------------------------------
+NAME
+--------------------------------------------------
+ADDRESS
+--------------------------------------------------------------------------------
+
+KA19 9853147
+ARAYAN
+MANGLORE
+
+KA19 2982145
+SOUBHIK
+
+DRIVER_ID
+------------------------------
+NAME
+--------------------------------------------------
+ADDRESS
+--------------------------------------------------------------------------------
+MANGLORE
+
+KA20 2895341
+VISHAL
+MANIPAL
+
+KA21 2098531
+
+DRIVER_ID
+------------------------------
+NAME
+--------------------------------------------------
+ADDRESS
+--------------------------------------------------------------------------------
+GAUTAM
+UDUIPI
+
+6 rows selected.
+
+
+SQL> select * from car;
+
+REGNO                MODEL                                YEAR
+-------------------- ------------------------------ ----------
+KA20 S2345           Tata Nexon                           2016
+KA20 S8473           MG Astor                             2018
+KA21 S3514           Maruti Suzuki Baleno                 2014
+KA21 S1475           Maruti Suzuki Baleno                 2016
+KA19 S5478           Hyundai Venue                        2016
+KA22 S6325           Hyundai Creta                        2015
+KA19 S1452           Hyundai Creta                        2020
+KA19 S4875           Hyundai Venue                        2019
+
+8 rows selected.
+
+SQL> select * from accident;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+           11 05-OCT-19 MANIPAL
+            1 14-SEP-20 MANGLORE
+           12 16-FEB-18 UDUIPI
+            7 17-NOV-19 MANIPAL
+            9 30-JUL-16 UDUIPI
+            5 21-MAR-21 MANGLORE
+
+6 rows selected.
+
+SQL> select * from owns;
+
+DRIVER_ID                      REGNO
+------------------------------ --------------------
+KA20 2019324                   KA20 S8473
+KA20 2015478                   KA22 S6325
+KA19 9853147                   KA20 S2345
+KA19 2982145                   KA21 S3514
+KA20 2895341                   KA19 S1452
+KA21 2098531                   KA21 S1475
+KA20 2019324                   KA19 S4875
+
+7 rows selected.
+
+SQL> select * from participated;
+
+DRIVER_ID                      REGNO                REPORT_NUMBER DAMAGE_AMOUNT
+------------------------------ -------------------- ------------- -------------
+KA20 2015478                   KA22 S6325                      11          5000
+KA20 2019324                   KA19 S4875                       1         35000
+KA19 2982145                   KA21 S3514                       9         15000
+KA20 2019324                   KA20 S8473                       5         19000
+KA19 2982145                   KA21 S3514                       7         17000
+KA20 2015478                   KA22 S6325                      12          3000
+
+6 rows selected.
+
+SQL>  UPDATE PARTICIPATED SET DAMAGE_AMOUNT = 25000 WHERE (REPORT_NUMBER = 12 AND REGNO = 'KA22 S6325');
+
+1 row updated.
+
+SQL> select * from participated;
+
+DRIVER_ID                      REGNO                REPORT_NUMBER DAMAGE_AMOUNT
+------------------------------ -------------------- ------------- -------------
+KA20 2015478                   KA22 S6325                      11          5000
+KA20 2019324                   KA19 S4875                       1         35000
+KA19 2982145                   KA21 S3514                       9         15000
+KA20 2019324                   KA20 S8473                       5         19000
+KA19 2982145                   KA21 S3514                       7         17000
+KA20 2015478                   KA22 S6325                      12         25000
+
+6 rows selected.
+
+SQL> delete from participated where report_number = (select report_number from accident where extract(year from accd_date) = '2018');
+
+1 row deleted.
+
+SQL>     delete from accident where extract(year from accd_date) = '2018';
+
+1 row deleted.
+
+SQL> select * from accident;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+           11 05-OCT-19 MANIPAL
+            1 14-SEP-20 MANGLORE
+            7 17-NOV-19 MANIPAL
+            9 30-JUL-16 UDUIPI
+            5 21-MAR-21 MANGLORE
+
+SQL> select * from participated;
+
+DRIVER_ID                      REGNO                REPORT_NUMBER DAMAGE_AMOUNT
+------------------------------ -------------------- ------------- -------------
+KA20 2015478                   KA22 S6325                      11          5000
+KA20 2019324                   KA19 S4875                       1         35000
+KA19 2982145                   KA21 S3514                       9         15000
+KA20 2019324                   KA20 S8473                       5         19000
+KA19 2982145                   KA21 S3514                       7         17000
+
+SQL> select * from owns;
+
+DRIVER_ID                      REGNO
+------------------------------ --------------------
+KA20 2019324                   KA20 S8473
+KA20 2015478                   KA22 S6325
+KA19 9853147                   KA20 S2345
+KA19 2982145                   KA21 S3514
+KA20 2895341                   KA19 S1452
+KA21 2098531                   KA21 S1475
+KA20 2019324                   KA19 S4875
+
+7 rows selected.
+
+SQL>  ALTER TABLE OWNS ADD (PRICE INT);
+
+Table altered.
+
+SQL> select * from owns;
+
+DRIVER_ID                      REGNO                     PRICE
+------------------------------ -------------------- ----------
+KA20 2019324                   KA20 S8473
+KA20 2015478                   KA22 S6325
+KA19 9853147                   KA20 S2345
+KA19 2982145                   KA21 S3514
+KA20 2895341                   KA19 S1452
+KA21 2098531                   KA21 S1475
+KA20 2019324                   KA19 S4875
+
+7 rows selected.
+
+SQL>  ALTER TABLE OWNS DROP COLUMN PRICE;
+
+Table altered.
+
+SQL> select * from owns;
+
+DRIVER_ID                      REGNO
+------------------------------ --------------------
+KA20 2019324                   KA20 S8473
+KA20 2015478                   KA22 S6325
+KA19 9853147                   KA20 S2345
+KA19 2982145                   KA21 S3514
+KA20 2895341                   KA19 S1452
+KA21 2098531                   KA21 S1475
+KA20 2019324                   KA19 S4875
+
+7 rows selected.
+
+SQL> ALTER TABLE ACCIDENT ADD CHECK (REPORT_NUMBER >0);
+
+Table altered.
+
+............................................................................................................................................................................................
+
+LAB 4
+
+
+SQL> SELECT COUNT(DISTINCT DRIVER_ID) FROM ACCIDENT, PARTICIPATED WHERE ACCIDENT.REPORT_NUMBER = PARTICIPATED.REPORT_NUMBER AND extract(year from accd_date) = '2019';
+
+COUNT(DISTINCTDRIVER_ID)
+------------------------
+                       2
+
+SQL> SELECT COUNT(PARTICIPATED.REGNO) FROM PARTICIPATED, CAR WHERE PARTICIPATED.REGNO = CAR.REGNO AND CAR.MODEL = 'Hyundai Creta';
+
+COUNT(PARTICIPATED.REGNO)
+-------------------------
+                        1
+
+SQL> SELECT
+  2      PERSON.NAME AS OWNER_NAME,
+  3      COUNT(PARTICIPATED.REPORT_NUMBER) AS NO_OF_ACCIDENT,
+  4      SUM(PARTICIPATED.DAMAGE_AMOUNT) AS TOTAL_DAMAGE
+  5  FROM
+  6      PARTICIPATED
+  7  JOIN
+  8      PERSON ON PERSON.DRIVER_ID = PARTICIPATED.DRIVER_ID
+  9  GROUP BY
+ 10      PERSON.NAME
+ 11  ORDER BY
+ 12      SUM(PARTICIPATED.DAMAGE_AMOUNT) DESC;
+
+OWNER_NAME                                         NO_OF_ACCIDENT TOTAL_DAMAGE
+-------------------------------------------------- -------------- ------------
+AKSHAY                                                          2        54000
+SOUBHIK                                                         2        32000
+AMAN                                                            1         5000
+
+SQL> SELECT NAME FROM PERSON WHERE DRIVER_ID IN (SELECT DRIVER_ID FROM PARTICIPATED GROUP BY DRIVER_ID HAVING COUNT(DRIVER_ID)>2);
+
+no rows selected
+
+SQL> SELECT NAME FROM PERSON WHERE DRIVER_ID IN (SELECT DRIVER_ID FROM PARTICIPATED GROUP BY DRIVER_ID HAVING COUNT(DRIVER_ID)>1);
+
+NAME
+--------------------------------------------------
+AKSHAY
+SOUBHIK
+
+SQL> SELECT PERSON.NAME FROM PERSON MINUS (SELECT DISTINCT PERSON.NAME FROM PERSON,PARTICIPATED WHERE PERSON.DRIVER_ID = PARTICIPATED.DRIVER_ID);
+
+NAME
+--------------------------------------------------
+ARAYAN
+VISHAL
+GAUTAM
+
+............................................................................................................................................................................................

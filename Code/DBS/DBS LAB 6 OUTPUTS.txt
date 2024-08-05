@@ -1,0 +1,140 @@
+SQL> CREATE OR REPLACE TRIGGER on_accident
+  2  AFTER  INSERT OR UPDATE on participated
+  3  For each row
+  4  declare
+  5  p_name person.name%type;
+  6  p_id person.driver_id%type;
+  7  p_addr person.Address%type;
+  8  BEGIN
+  9  if INSERTING then
+ 10  SELECT driver_id, name, address
+ 11  INTO p_id, p_name, p_addr
+ 12  FROM person
+ 13  WHERE driver_id = :new.driver_id;
+ 14  dbms_output.put_line('name : '||p_name||' driver id : '||p_id||' address : '||p_addr);
+ 15  END if;
+ 16  END;
+ 17  /
+
+Trigger created.
+
+SQL> insert into PERSON values('KA23 1234567', 'AAAA', 'MANIPAL');
+
+1 row created.
+
+SQL> insert into PARTICIPATED values('KA23 1234567', 'KA21 S3514', 22, 66000);
+name : AAAA driver id : KA23 1234567 address : MANIPAL
+
+
+SQL> CREATE OR REPLACE function acc2(year1 in varchar) return number as
+  2  counter integer;
+  3  BEGIN
+  4  SELECT count(*) INTO counter
+  5  FROM ACCIDENT a
+  6  WHERE extract(year FROM accd_date)=year1;
+  7  dbms_output.put_line('Total Accidents Function');
+  8  return counter;
+  9  END;
+ 10  /
+
+Function created.
+
+SQL> declare year integer;
+  2  BEGIN
+  3  year:=acc2(2020);
+  4  dbms_output.put_line(year);
+  5  END;
+  6  /
+Total Accidents Function
+1
+
+PL/SQL procedure successfully completed.
+
+SQL> declare n number(2);
+  2  BEGIN
+  3  n:=acc2(2000);
+  4  dbms_output.put_line('No of accidents: '||n);
+  5  END;
+  6  /
+Total Accidents Function
+No of accidents: 0
+
+PL/SQL procedure successfully completed.
+
+SQL> select * from accident;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+           11 05-OCT-19 MANIPAL
+            1 14-SEP-20 MANGLORE
+            7 17-NOV-19 MANIPAL
+            9 30-JUL-16 UDUIPI
+            5 21-MAR-21 MANGLORE
+
+SQL> select * from participated;
+
+DRIVER_ID                      REGNO                REPORT_NUMBER DAMAGE_AMOUNT
+------------------------------ -------------------- ------------- -------------
+KA20 2015478                   KA22 S6325                      11          5000
+KA20 2019324                   KA19 S4875                       1         35000
+KA19 2982145                   KA21 S3514                       9         15000
+KA20 2019324                   KA20 S8473                       5         19000
+KA19 2982145                   KA21 S3514                       7         17000
+
+SQL> create or replace procedure damage(did_in in varchar2,year_in in varchar2)
+  2  as tot_dmg_amt integer;
+  3  begin
+  4    select sum(damage_amount) into tot_dmg_amt
+  5    from participated
+  6    where report_number in (select report_number
+  7    from accident
+  8    where extract(year from accd_date)=year_in)
+  9    and driver_id=did_in;
+ 10   DBMS_OUTPUT.PUT_LINE(tot_dmg_amt);
+ 11  end;
+ 12  /
+
+Procedure created.
+
+SQL> execute damage('KA20 2019324','2020');
+35000
+
+PL/SQL procedure successfully completed.
+
+SQL> select * from accident;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- --------------------------------------------------
+           11 05-OCT-19 MANIPAL
+            1 14-SEP-20 MANGLORE
+            7 17-NOV-19 MANIPAL
+            9 30-JUL-16 UDUIPI
+            5 21-MAR-21 MANGLORE
+
+SQL> CREATE OR REPLACE procedure acc1(loc in varchar) IS
+  2  rno INTEGER;
+  3  BEGIN
+  4  For item in(
+  5  SELECT * FROM ACCIDENT WHERE ACCIDENT.location=loc
+  6  ) LOOP
+  7  dbms_output.put_line('Report Number : '||item.report_number);
+  8  dbms_output.put_line('Accident Date : '||item.accd_date);
+  9  dbms_output.put_line('Location : '||item.location);
+ 10  END LOOP;
+ 11  END;
+ 12  /
+
+Procedure created.
+
+SQL> set serveroutput on;
+SQL> declare
+  2  BEGIN
+  3  acc1('UDUIPI');
+  4  END
+  5  ;
+  6  /
+Report Number : 9
+Accident Date : 30-JUL-16
+Location : UDUIPI
+
+PL/SQL procedure successfully completed.

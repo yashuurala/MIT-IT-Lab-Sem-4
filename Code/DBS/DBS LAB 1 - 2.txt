@@ -1,0 +1,725 @@
+lab 1
+
+1.
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Q1
+{
+    public partial class Form1 : Form
+    {
+        string v1 = string.Empty;
+        string v2 = string.Empty;
+        string input = string.Empty;
+        char op;
+        double res;
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;   //clears the text in textBox1 by setting its Text property to an empty string.
+            this.textBox1.Text += "";
+            input += "8";                        //appends the character "8" to a string variable named input
+            this.textBox1.Text += input;         //appends the value of the input variable to the Text property of textBox1
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            v1 = input;                         //v1 is used to store the first operand //before pressing / we press a no the n / the another no 1st no is                          
+                                                 stored in input and resp in v1
+            input = string.Empty;              //make input zero bcoz it should store 2nd operand
+            op = '/';                           //op is made as / later this is checked when ans button is pressed
+            this.textBox1.Text = string.Empty;
+        }
+
+        private void button16_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            input = string.Empty;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += "1";
+            this.textBox1.Text += input;
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += "2";
+            this.textBox1.Text += input;
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += "3";
+            this.textBox1.Text += input;
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += "4";
+            this.textBox1.Text += input;
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += "5";
+            this.textBox1.Text += input;
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += "6";
+            this.textBox1.Text += input;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += "7";
+            this.textBox1.Text += input;
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += "9";
+            this.textBox1.Text += input;
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += "0";
+            this.textBox1.Text += input;
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            v1 = input;
+            input = string.Empty;
+            op = '+';
+            this.textBox1.Text = string.Empty;
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            v1 = input;
+            input = string.Empty;
+            op = '-';
+            this.textBox1.Text = string.Empty;
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            v1 = input;
+            input = string.Empty;
+            op = '*';
+            this.textBox1.Text = string.Empty;
+        }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            v1 = input;
+            input = string.Empty;
+            op = '%';
+            this.textBox1.Text = string.Empty;
+        }
+
+        private void button17_Click(object sender, EventArgs e)  //ans button
+        {
+            v2 = input;                                         //at / side input is made zero now it is 2nd opnd stored in v2
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+
+            double num1, num2;
+            double.TryParse(v1, out num1);                      // string stored in the variable v1 is converted into a number (double equivalent) 
+            double.TryParse(v2, out num2);
+
+            if (op == '+')                                     //op value checked here
+            {
+                res = num1 + num2;                             //result stored in res
+                this.textBox1.Text = res.ToString();           // res in double convert it to string
+            }
+            else if (op == '-')
+            {
+                res = num1 - num2;
+                this.textBox1.Text = res.ToString();
+            }
+            else if (op == '*')
+            {
+                res = num1 * num2;
+                this.textBox1.Text = res.ToString();
+            }
+            else if (op == '/')
+            {
+                res = num1 / num2;
+                this.textBox1.Text = res.ToString();
+            }
+            else if (op == '%')
+            {
+                res = num1 % num2;
+                this.textBox1.Text = res.ToString();
+            }
+            input = string.Empty;
+        }
+
+        private void button18_Click(object sender, EventArgs e)
+        {
+            v1 = input;                               //only 1 input for sin
+
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+
+            double num1;
+            double.TryParse(v1, out num1);            //v1 to double
+
+            res = Math.Sin(num1);                     //res in double
+            this.textBox1.Text = res.ToString();      //res convert to string
+            input = string.Empty;
+        }
+
+        private void button19_Click(object sender, EventArgs e)
+        {
+            v1 = input;
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            double num1;
+            double.TryParse(v1, out num1);
+            res = Math.Cos(num1);
+            this.textBox1.Text = res.ToString();
+            input = string.Empty;
+        }
+
+        private void button21_Click(object sender, EventArgs e)
+        {
+            v1 = input;
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            double num1;
+            double.TryParse(v1, out num1);
+            res = Math.Exp(num1);
+            this.textBox1.Text = res.ToString();
+            input = string.Empty;
+        }
+
+        private void button20_Click(object sender, EventArgs e)
+        {
+            v1 = input;
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            double num1;
+            double.TryParse(v1, out num1);
+            res = 1 / num1;
+            this.textBox1.Text = res.ToString();
+            input = string.Empty;
+        }
+
+        private void button22_Click(object sender, EventArgs e)
+        {
+            v1 = input;
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            double num1;
+            double.TryParse(v1, out num1);
+            res = Math.Tan(num1);
+            this.textBox1.Text = res.ToString();
+            input = string.Empty;
+        }
+
+        private void button23_Click(object sender, EventArgs e)
+        {
+            this.textBox1.Text = string.Empty;
+            this.textBox1.Text += "";
+            input += ".";
+            this.textBox1.Text += input;
+        }
+    }
+}
+
+
+2.
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Q2
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string msg = string.Empty;                        // create string msg and error  //can be declared globally r even inside button bcoz it is the 
+                                                             part whch is active
+            msg = "";
+            string error = "";
+
+
+            if (textBox1.Text == "")
+                error += "Enter Name\n";
+            else
+                msg += "Name: " + textBox1.Text;
+
+
+            DateTime iDate;                                    // declares a variable named iDate of type DateTime
+            iDate = dateTimePicker1.Value;                     //assign value to iDate
+            msg += "\nDOB: " + iDate;                       
+
+
+            if (radioButton1.Checked == true)
+                msg += "\nGender: Male";
+            else if (radioButton2.Checked == true)
+                msg += "\nGender: Female";
+            else if (radioButton3.Checked == true)
+                msg += "\nGender: Others";
+            else
+                error += "Select Gender\n";
+
+
+            if ((textBox2.Text).Length != 10)
+                error += "Incorrect Phone no.\n";
+            else
+                msg += "\nPhone no.: " + textBox2.Text;
+
+
+            if (textBox3.Text == "")
+                error += "Enter Email ID\n";
+            else
+                msg += "\nEmail ID: " + textBox3.Text;
+
+
+            if (comboBox1.SelectedItem == null)
+                error += "Enter Semester\n";
+            else
+                msg += "\nSemester: " + comboBox1.SelectedItem;
+
+
+            if (comboBox2.SelectedItem == null)
+                error += "Enter Semester\n";
+            else
+                msg += "\nBranch: " + comboBox2.SelectedItem;
+
+
+            msg += "\n--Interests--\n";
+            if (JAVA.Checked == true)
+                msg += "  JAVA\n";
+            if (checkBox2.Checked == true)
+                msg += "  C#\n";
+            if (checkBox1.Checked == true)
+                msg += "  C++\n";
+            if (checkBox3.Checked == true)
+                msg += "  C\n";
+            if (checkBox4.Checked == true)
+                msg += "  PYTHON\n";
+            if (checkBox5.Checked == true)
+                msg += "  DBS\n";
+            
+            if (error != "")
+            {
+                MessageBox.Show(error);
+            }
+            else
+                MessageBox.Show(msg);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            dateTimePicker1.Format = DateTimePickerFormat.Short;   //This typically shows only the date without the time component.
+
+             //If you also want the time to be displayed along with the date in the DateTimePicker.
+            //dateTimePicker1.Format = DateTimePickerFormat.Short;
+              dateTimePicker1.ShowUpDown = true; 
+              dateTimePicker1.CustomFormat = "MM/dd/yyyy hh:mm:tt"; 
+        }
+   }
+}
+
+Lab 2
+
+1.
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+
+namespace L2Q1
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            saveFileDialog1.ShowDialog();
+            string fName = saveFileDialog1.FileName;
+            StreamWriter sw = new StreamWriter(fName);
+            sw.Write(richTextBox1.Text);
+            sw.Flush();
+            sw.Close();
+        }
+
+        private void fontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FontDialog fd = new FontDialog();
+            fd.Font = richTextBox1.SelectionFont;
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                richTextBox1.SelectionFont = fd.Font;   
+            }
+        }
+
+        private void colorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog fd = new ColorDialog();
+            fd.Color = richTextBox1.SelectionColor;
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                richTextBox1.SelectionColor = fd.Color;
+            }
+        }
+
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Title = "Open";
+            dlg.ShowDialog();
+            string fName = dlg.FileName;
+            StreamReader sr = new StreamReader(fName);
+            richTextBox1.Text = sr.ReadToEnd();
+            sr.Close();
+        }
+        
+        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void saveFileDialog1_FileOk_1(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void aboutUsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Hello\n");
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
+
+        /*private void cutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(txt.SelectedText);
+            txt.SelectedText = string.Empty;
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(txt.SelectedText);
+        }
+
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string xx = Clipboard.GetText();
+            txt.Text = txt.Text.Insert(txt.SelectionStart, xx);
+        }*/
+
+
+
+      
+    }
+}
+2.
+
+form 1
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace bank
+{
+    public partial class Form1 : Form
+    {
+        public static string txt1 = "";
+        public static string txt2 = "";
+        public static int balance = 10000;
+        public static string pass = "abcd";
+        public static string date = "";
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void sign_in_Click(object sender, EventArgs e)
+        {
+                date = DateTime.Now.ToString();     //to get present date tym and store in Date
+
+                if (textBox1.Text == "Yashu" && textBox2.Text != pass)
+                {
+                    MessageBox.Show("Incorrect Name or Password!");
+                }
+                else
+                {
+                    txt1 = textBox1.Text;   //username is put into txt which is declared globally so it can be used in next form
+                    Form2 f2 = new Form2();
+                    this.Hide();
+                    f2.ShowDialog();
+                    this.Show();
+                }
+                
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            textBox2.PasswordChar = '*';
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Form4 f4 = new Form4();
+            this.Hide();
+            f4.ShowDialog();
+            this.Show();
+        }
+    }
+}
+
+form 2
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace bank
+{
+    public partial class Form2 : Form
+    {
+        public static int last_trans = 0;
+        public static string last_trans_name = " ";   //trans is displayed here //now value is zero but updated in next Form
+        public static string last_process = "";
+        public Form2()
+        {
+            InitializeComponent();
+            label7.Text = label7.Text + Form1.txt1;      //txt from previous form is used   //+ ref to concatination
+            label8.Text = label8.Text + 78922000564;      // add num
+            label9.Text = label9.Text + " NABK798826";     //add string 
+            label10.Text = label10.Text + Form1.balance;     //
+            label12.Text = label12.Text + Form1.date;         //from prev form
+            label14.Text = label14.Text + last_process + "\n \t";   //from same form
+       
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Form3 f3 = new Form3();
+            this.Hide();
+            f3.ShowDialog();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+
+            MessageBox.Show("Available Balance is " + Form1.balance);
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.OK;                            //back or ok button
+        }
+    }
+}
+
+
+form 3
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace bank
+{
+    public partial class Form3 : Form
+    {
+        public Form3()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if(int.Parse(textBox3.Text) < Form1.balance - 500)    //500 min balance   //textBox3 is amount to trans
+            {
+                Form2.last_trans_name = textBox1.Text;     //form2 content filled here //textBox1 has name
+
+                Form2.last_trans = int.Parse(textBox3.Text);   //has amot string converted to int 
+
+                Form2.last_process = " " + Form2.last_process + Form2.last_trans_name + " / Rs." + Form2.last_trans.ToString() + "\n \n                                 ";
+
+//Form2.last_process: This likely accesses the current value of last_process and add new rsp
+
+                Form1.balance = Form1.balance - int.Parse(amount.Text);  //decr balance in form 1
+
+                textBox1.Text = "";
+                textBox2.Text = "";
+                textBox3.Text = "";
+
+                MessageBox.Show("Rs." + amount.Text + " successfully transferred!! \n \n Avalaible balance: " + Form1.balance);
+            }
+            else
+            {
+                MessageBox.Show("Insufficient balance!");
+            }
+        }
+
+        private void back3_Click(object sender, EventArgs e)      //Back button
+        {
+            Form2 newf2 = new Form2();
+            this.Hide();
+            newf2.ShowDialog();
+        }
+    }
+}
+
+
+form 4
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace bank
+{
+    public partial class Form4 : Form
+    {
+        public Form4()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if(textBox1.Text == textBox2.Text)
+            {
+                Form1.pass = pass1.Text;                     //change pass in form 1
+                MessageBox.Show("Password Modified!!");
+            }
+            else
+            {
+                MessageBox.Show("Enter same password");
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.OK;
+        }
+
+        private void pass1_TextChanged(object sender, EventArgs e)
+        {
+            pass1.PasswordChar = '*';
+        }
+
+        private void pass2_TextChanged(object sender, EventArgs e)
+        {
+            pass2.PasswordChar = '*';
+        }
+    }
+}
